@@ -1405,7 +1405,7 @@
       const handledSockets = new WeakSet();
       const state = {
         power: true,
-        inputs: [true, false, true, true, true, true, true, false],
+        inputs: Array(8).fill(false),
         aux: Array(4).fill(false),
         gateOutputs: {},
         wires: [],
@@ -1418,7 +1418,7 @@
           { kind: 'D', label: 'D2', prefix: 'dff_2', q: false, lastClk: false }
         ],
         jkffs: [
-          { kind: 'JK', label: 'JK1', prefix: 'jkff_1', q: true, lastClk: false },
+          { kind: 'JK', label: 'JK1', prefix: 'jkff_1', q: false, lastClk: false },
           { kind: 'JK', label: 'JK2', prefix: 'jkff_2', q: false, lastClk: false }
         ],
         zifLocked: false,
