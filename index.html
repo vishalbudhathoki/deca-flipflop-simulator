@@ -698,29 +698,31 @@
     <div class="middle-section">
       <div class="w-32 bg-[#e6e4d8] border-r-dark flex flex-col">
         <div class="p-2 border-b-dark h-16 flex flex-col justify-center mt-2">
-          <div class="flex items-center justify-between px-2 mb-1">
-            <span class="small-label">+5V</span>
-            <div class="connection-point w-3 h-3 relative">
-              <div class="physical-socket" style="top:50%;left:50%;transform:translate(-50%,-50%);" data-type="output" data-pin="vcc_1"></div>
+          <div class="flex items-center justify-center px-2 mb-1 gap-4">
+            <div class="flex flex-col items-center">
+              <span class="small-label">+5V</span>
+              <div class="connection-point w-3 h-3 relative mt-1">
+                <div class="physical-socket" style="top:50%;left:50%;transform:translate(-50%,-50%);" data-type="output" data-pin="vcc_1"></div>
+              </div>
             </div>
-            <div class="connection-point w-3 h-3 relative">
-              <div class="physical-socket" style="top:50%;left:50%;transform:translate(-50%,-50%);" data-type="output" data-pin="vcc_2"></div>
-            </div>
-          </div>
-          <div class="flex items-center justify-between px-2">
-            <span class="small-label">GND</span>
-            <div class="connection-point w-3 h-3 relative">
-              <div class="physical-socket" style="top:50%;left:50%;transform:translate(-50%,-50%);" data-type="output" data-pin="gnd_1"></div>
-            </div>
-            <div class="connection-point w-3 h-3 relative">
-              <div class="physical-socket" style="top:50%;left:50%;transform:translate(-50%,-50%);" data-type="output" data-pin="gnd_2"></div>
+            <div class="flex flex-col items-center">
+              <span class="small-label">GND</span>
+              <div class="connection-point w-3 h-3 relative mt-1">
+                <div class="physical-socket" style="top:50%;left:50%;transform:translate(-50%,-50%);" data-type="output" data-pin="gnd_1"></div>
+              </div>
             </div>
           </div>
           <div class="text-center text-xs font-bold mt-1">POWER SUPPLY</div>
         </div>
         <div class="p-2 flex flex-col items-center justify-center h-16">
-          <div class="flex items-center justify-center w-full px-2">
+          <div class="flex items-center justify-around w-full px-2">
             <div id="clock-lamp" class="w-4 h-4 bg-red-600 rounded-full border border-red-800 shadow-inner"></div>
+            <div class="flex flex-col items-center">
+              <span class="small-label">+5V</span>
+              <div class="connection-point w-3 h-3 relative mt-1">
+                <div class="physical-socket" style="top:50%;left:50%;transform:translate(-50%,-50%);" data-type="output" data-pin="pulse5v"></div>
+              </div>
+            </div>
           </div>
           <div class="text-center text-xs font-bold mt-1">CLOCK PULSE</div>
         </div>
@@ -1709,29 +1711,29 @@
       const bottomSection = $('.bottom-section');
       const supplySidebar = $('.middle-section > div:first-child');
       const supplyPoints = $$('.connection-point', supplySidebar);
-      supplyPoints.slice(0, 2).forEach((point, index) => {
+      supplyPoints.slice(0, 1).forEach((point, index) => {
         handledPoints.add(point);
         registerEndpoint(point, {
-          id: `VCC${index}`,
+          id: `VCC0`,
           type: 'source',
-          label: `+5V source jack ${index + 1}`,
+          label: `+5V source jack`,
           shortLabel: '+5V',
           signal: () => state.power
         });
       });
-      supplyPoints.slice(2, 4).forEach((point, index) => {
+      supplyPoints.slice(1, 2).forEach((point, index) => {
         handledPoints.add(point);
         registerEndpoint(point, {
-          id: `GND${index}`,
+          id: `GND0`,
           type: 'source',
-          label: `Ground source jack ${index + 1}`,
+          label: `Ground source jack`,
           shortLabel: 'GND',
           signal: () => false
         });
       });
-      if (supplyPoints[4]) {
-        handledPoints.add(supplyPoints[4]);
-        registerEndpoint(supplyPoints[4], {
+      if (supplyPoints[2]) {
+        handledPoints.add(supplyPoints[2]);
+        registerEndpoint(supplyPoints[2], {
           id: 'PULSE5V',
           type: 'source',
           label: 'Clock pulse +5V jack',
@@ -2313,7 +2315,7 @@
       function applyJkFlipFlopConfig() {
         [
           ['JK1:PRE', 'JK1:CLR', '#212121'],
-          ['VCC1', 'JK1:PRE', '#e53935'],
+          ['VCC0', 'JK1:PRE', '#e53935'],
           ['IN5', 'JK1:J', '#e53935'],
           ['IN6', 'JK1:K', '#e53935'],
           ['CLK', 'JK1:CLK', '#e53935'],
