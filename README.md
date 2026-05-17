@@ -2,9 +2,11 @@
 
 A web-based interactive laboratory simulator suite developed for testing and verifying logic circuits and power supply topologies. This project combines two highly detailed physical hardware simulations into a single accessible web interface.
 
-## 🚀 Accessing the Simulators
+## 🚀 Live Demo & Access
 
-No backend server or build tools are required. Simply open **`index.html`** in any modern web browser to access the central simulator selection hub.
+The project is hosted live at: **[https://deca-practical-simulator.vercel.app/](https://deca-practical-simulator.vercel.app/)**
+
+No backend server or build tools are required. Simply open the link or run **`index.html`** locally in any modern web browser to access the central simulator selection hub.
 
 From the hub, you can choose between:
 1. **Digital Electronics Trainer Kit (DTK 451)** — `trainer.html`
