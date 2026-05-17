@@ -300,6 +300,7 @@
 
     .terminal.active,
     .terminal.selected,
+    .terminal.drop-target,
     .terminal:hover {
       outline: 3px solid rgba(47,111,212,0.24);
       transform: translateY(-1px);
@@ -308,6 +309,11 @@
     .terminal.selected {
       outline-color: rgba(255,206,69,0.78);
       box-shadow: inset 0 2px 4px rgba(0,0,0,0.6), 0 0 0 5px rgba(255,206,69,0.2);
+    }
+
+    .terminal.drop-target {
+      outline-color: rgba(80,216,137,0.85);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.6), 0 0 0 7px rgba(80,216,137,0.22);
     }
 
     .power-panel {
@@ -582,6 +588,27 @@
       text-align: center;
       z-index: 5;
       background: rgba(237,241,241,0.9);
+    }
+
+    .common-label {
+      position: absolute;
+      left: 50%;
+      bottom: -6px;
+      transform: translateX(-50%);
+      margin-top: 5px;
+      color: #202020;
+      font-size: 0.58rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      z-index: 5;
+    }
+
+    .common-terminal {
+      position: absolute;
+      left: 50%;
+      bottom: 15px;
+      transform: translateX(-50%);
+      z-index: 12;
     }
 
     .zener-package {
@@ -1326,7 +1353,6 @@
                     <polygon points="26,12 13,30 39,30" fill="none" stroke="#202020" stroke-width="3"></polygon>
                     <polyline points="13,9 18,14 34,14 39,19" fill="none" stroke="#202020" stroke-width="3"></polyline>
                   </svg>
-                  <span class="terminal red" data-terminal="z6_a" title="6.2V anode"></span>
                 </div>
 
                 <div class="zener-package" aria-hidden="true">
@@ -1344,7 +1370,8 @@
                     <polygon points="26,12 13,30 39,30" fill="none" stroke="#202020" stroke-width="3"></polygon>
                     <polyline points="13,9 18,14 34,14 39,19" fill="none" stroke="#202020" stroke-width="3"></polyline>
                   </svg>
-                  <span class="terminal red" data-terminal="z8_a" title="8.2V anode"></span>
+                  <span class="terminal red common-terminal" data-terminal="z_common" title="Common Zener anode terminal"></span>
+                  <span class="common-label">COMMON</span>
                 </div>
 
                 <div class="zener-package" aria-hidden="true">
@@ -1362,10 +1389,9 @@
                     <polygon points="26,12 13,30 39,30" fill="none" stroke="#202020" stroke-width="3"></polygon>
                     <polyline points="13,9 18,14 34,14 39,19" fill="none" stroke="#202020" stroke-width="3"></polyline>
                   </svg>
-                  <span class="terminal red" data-terminal="z12_a" title="12V anode"></span>
                 </div>
               </div>
-              <button class="glass-lid" id="glass-lid" type="button" aria-label="Lift Zener diode cover"></button>
+              <button class="glass-lid open" id="glass-lid" type="button" aria-label="Lift Zener diode cover"></button>
             </section>
           </div>
 
@@ -1453,9 +1479,9 @@
       };
 
       const zeners = {
-        z6: { label: "6.2V", vz: 6.2, k: "z6_k", a: "z6_a" },
-        z8: { label: "8.2V", vz: 8.2, k: "z8_k", a: "z8_a" },
-        z12: { label: "12V", vz: 12.0, k: "z12_k", a: "z12_a" }
+        z6: { label: "6.2V", vz: 6.2, k: "z6_k", a: "z_common" },
+        z8: { label: "8.2V", vz: 8.2, k: "z8_k", a: "z_common" },
+        z12: { label: "12V", vz: 12.0, k: "z12_k", a: "z_common" }
       };
 
       const modes = [
@@ -1515,6 +1541,7 @@
       let draggingKnob = false;
       let draggingDial = false;
       const dragThreshold = 8;
+      const dropRadius = 42;
 
       class DSU {
         constructor(ids) {
@@ -1648,6 +1675,48 @@
           x: rect.left - stageRect.left + rect.width / 2,
           y: rect.top - stageRect.top + rect.height / 2
         };
+      }
+
+      function terminalClientCenter(id) {
+        const el = terminalById.get(id);
+        const rect = el.getBoundingClientRect();
+        return {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2
+        };
+      }
+
+      function clearDropTarget() {
+        document.querySelectorAll(".terminal.drop-target").forEach((el) => el.classList.remove("drop-target"));
+      }
+
+      function terminalNearPoint(clientX, clientY, excludeId) {
+        const stacked = document.elementsFromPoint(clientX, clientY);
+        for (const el of stacked) {
+          const terminal = el.closest && el.closest("[data-terminal]");
+          if (terminal && terminal.dataset.terminal !== excludeId) return terminal;
+        }
+
+        let best = null;
+        let bestDistance = Infinity;
+        terminals.forEach((terminal) => {
+          const id = terminal.dataset.terminal;
+          if (id === excludeId) return;
+          const center = terminalClientCenter(id);
+          const distance = Math.hypot(center.x - clientX, center.y - clientY);
+          if (distance < bestDistance) {
+            best = terminal;
+            bestDistance = distance;
+          }
+        });
+        return bestDistance <= dropRadius ? best : null;
+      }
+
+      function updateDropTarget(clientX, clientY, excludeId) {
+        clearDropTarget();
+        const terminal = terminalNearPoint(clientX, clientY, excludeId);
+        if (terminal) terminal.classList.add("drop-target");
+        return terminal;
       }
 
       function colorForWire(start, end) {
@@ -2029,6 +2098,9 @@
             drawing.moved = true;
             clearTerminalSelection();
           }
+          if (drawing.moved) {
+            updateDropTarget(event.clientX, event.clientY, drawing.start);
+          }
           redrawWires();
         }
         if (draggingKnob) {
@@ -2042,17 +2114,19 @@
 
       window.addEventListener("pointerup", (event) => {
         if (drawing) {
-          const target = document.elementFromPoint(event.clientX, event.clientY);
-          const endTerminal = target && target.closest("[data-terminal]");
+          const endTerminal = terminalNearPoint(event.clientX, event.clientY, drawing.start);
           document.querySelectorAll(".terminal.active").forEach((el) => el.classList.remove("active"));
+          clearDropTarget();
           drawing.el.remove();
           const start = drawing.start;
           const wasDrag = drawing.moved;
           drawing = null;
-          if (wasDrag && endTerminal && endTerminal.dataset.terminal !== start) {
+          if (wasDrag && endTerminal) {
             addWire(start, endTerminal.dataset.terminal);
           } else if (!wasDrag) {
             handleTerminalClick(start);
+          } else {
+            showToast("Drop on a jack to connect");
           }
         }
         if (draggingKnob) draggingKnob = false;
