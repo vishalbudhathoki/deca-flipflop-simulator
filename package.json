@@ -2,9 +2,11 @@
   "name": "deca-practical-apparatus",
   "version": "1.0.0",
   "description": "A web-based interactive laboratory simulator suite developed for testing and verifying logic circuits and power supply topologies. This project combines two highly detailed physical hardware simulations into a single accessible web interface.",
-  "main": "test.js",
+  "main": "src/tests/test.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:css": "tailwindcss -i ./src/css/input.css -o ./src/css/tailwind.css",
+    "watch:css": "tailwindcss -i ./src/css/input.css -o ./src/css/tailwind.css --watch"
   },
   "repository": {
     "type": "git",
@@ -21,6 +23,7 @@
   "devDependencies": {
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.11",
+    "jsdom": "^29.1.1",
     "tailwindcss": "^3.4.19"
   }
 }
