@@ -5,6 +5,233 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Rectifier Apparatus Simulator</title>
 <link href="tailwind.css" rel="stylesheet"/>
+<style data-purpose="tailwind-fallback">
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+    html {
+      line-height: 1.5;
+      -webkit-text-size-adjust: 100%;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    button {
+      font: inherit;
+    }
+    .absolute { position: absolute; }
+    .relative { position: relative; }
+    .inset-0 { inset: 0; }
+    [class~="inset-[2px]"] { inset: 2px; }
+    .z-0 { z-index: 0; }
+    .z-10 { z-index: 10; }
+    .pointer-events-none { pointer-events: none; }
+    .cursor-pointer { cursor: pointer; }
+    .select-none { user-select: none; }
+    .antialiased {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .flex-1 { flex: 1 1 0%; }
+    .items-center { align-items: center; }
+    .items-end { align-items: flex-end; }
+    .justify-center { justify-content: center; }
+    .justify-end { justify-content: flex-end; }
+    .justify-between { justify-content: space-between; }
+    .justify-around { justify-content: space-around; }
+    .justify-evenly { justify-content: space-evenly; }
+    .gap-1 { gap: 0.25rem; }
+    .gap-3 { gap: 0.75rem; }
+
+    .min-h-screen { min-height: 100vh; }
+    .h-full { height: 100%; }
+    .w-full { width: 100%; }
+    [class~="max-w-[1280px]"] { max-width: 1280px; }
+    [class~="aspect-[16/9]"] { aspect-ratio: 16 / 9; }
+    [class~="w-[10%]"] { width: 10%; }
+    [class~="w-[18%]"] { width: 18%; }
+    [class~="w-[30%]"] { width: 30%; }
+    [class~="w-[85%]"] { width: 85%; }
+    .w-1 { width: 0.25rem; }
+    .w-1\.5 { width: 0.375rem; }
+    .w-2\.5 { width: 0.625rem; }
+    .w-3\.5 { width: 0.875rem; }
+    .w-4 { width: 1rem; }
+    .w-5 { width: 1.25rem; }
+    .w-6 { width: 1.5rem; }
+    .w-7 { width: 1.75rem; }
+    .w-8 { width: 2rem; }
+    .w-12 { width: 3rem; }
+    .h-1 { height: 0.25rem; }
+    .h-1\.5 { height: 0.375rem; }
+    .h-3\.5 { height: 0.875rem; }
+    .h-4 { height: 1rem; }
+    .h-5 { height: 1.25rem; }
+    .h-6 { height: 1.5rem; }
+    .h-7 { height: 1.75rem; }
+    .h-8 { height: 2rem; }
+    .h-24 { height: 6rem; }
+    [class~="h-[2px]"] { height: 2px; }
+
+    .p-1\.5 { padding: 0.375rem; }
+    .p-3 { padding: 0.75rem; }
+    .p-4 { padding: 1rem; }
+    .px-1 { padding-left: 0.25rem; padding-right: 0.25rem; }
+    .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+    .px-4 { padding-left: 1rem; padding-right: 1rem; }
+    [class~="px-[15%]"] { padding-left: 15%; padding-right: 15%; }
+    .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+    .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+    .pt-1 { padding-top: 0.25rem; }
+    .pt-2 { padding-top: 0.5rem; }
+    .pb-1 { padding-bottom: 0.25rem; }
+    .pb-2 { padding-bottom: 0.5rem; }
+    .mb-1 { margin-bottom: 0.25rem; }
+    .mb-2 { margin-bottom: 0.5rem; }
+    .mb-8 { margin-bottom: 2rem; }
+    .mt-1 { margin-top: 0.25rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mt-4 { margin-top: 1rem; }
+
+    .top-1\/2 { top: 50%; }
+    .top-1 { top: 0.25rem; }
+    [class~="-top-1"] { top: -0.25rem; }
+    [class~="-top-2"] { top: -0.5rem; }
+    [class~="-top-4"] { top: -1rem; }
+    .bottom-1 { bottom: 0.25rem; }
+    .left-1 { left: 0.25rem; }
+    .left-2 { left: 0.5rem; }
+    .left-4 { left: 1rem; }
+    [class~="-left-2"] { left: -0.5rem; }
+    [class~="-left-4"] { left: -1rem; }
+    [class~="left-[5%]"] { left: 5%; }
+    [class~="left-[15%]"] { left: 15%; }
+    [class~="left-[18%]"] { left: 18%; }
+    [class~="left-[25%]"] { left: 25%; }
+    [class~="left-[35%]"] { left: 35%; }
+    [class~="left-[38%]"] { left: 38%; }
+    [class~="left-[45%]"] { left: 45%; }
+    [class~="left-[50%]"] { left: 50%; }
+    [class~="left-[55%]"] { left: 55%; }
+    [class~="left-[59%]"] { left: 59%; }
+    [class~="left-[62%]"] { left: 62%; }
+    [class~="left-[65%]"] { left: 65%; }
+    [class~="left-[68%]"] { left: 68%; }
+    [class~="left-[70%]"] { left: 70%; }
+    [class~="left-[75%]"] { left: 75%; }
+    [class~="left-[77%]"] { left: 77%; }
+    [class~="left-[83%]"] { left: 83%; }
+    [class~="left-[88%]"] { left: 88%; }
+    [class~="left-[95%]"] { left: 95%; }
+    [class~="top-[10%]"] { top: 10%; }
+    [class~="top-[13%]"] { top: 13%; }
+    [class~="top-[20%]"] { top: 20%; }
+    [class~="top-[24%]"] { top: 24%; }
+    [class~="top-[35%]"] { top: 35%; }
+    [class~="top-[38%]"] { top: 38%; }
+    [class~="top-[42%]"] { top: 42%; }
+    [class~="top-[50%]"] { top: 50%; }
+    [class~="top-[60%]"] { top: 60%; }
+    [class~="top-[61%]"] { top: 61%; }
+    [class~="top-[80%]"] { top: 80%; }
+
+    .transform {
+      --tw-translate-x: 0;
+      --tw-translate-y: 0;
+      --tw-rotate: 0deg;
+      transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate));
+    }
+    [class~="-translate-x-1/2"] { --tw-translate-x: -50%; }
+    [class~="-translate-y-1/2"] { --tw-translate-y: -50%; }
+    .origin-bottom { transform-origin: bottom; }
+    .transition-transform { transition-property: transform; }
+    .duration-200 { transition-duration: 200ms; }
+
+    .rounded { border-radius: 0.25rem; }
+    .rounded-md { border-radius: 0.375rem; }
+    .rounded-lg { border-radius: 0.5rem; }
+    .rounded-xl { border-radius: 0.75rem; }
+    .rounded-full { border-radius: 9999px; }
+    .border { border-width: 1px; border-style: solid; }
+    .border-2 { border-width: 2px; border-style: solid; }
+    [class~="border-[2px]"] { border-width: 2px; border-style: solid; }
+    [class~="border-[3px]"] { border-width: 3px; border-style: solid; }
+    .border-t-2 { border-top-width: 2px; border-top-style: solid; }
+    .border-transparent { border-color: transparent; }
+    .border-white { border-color: #fff; }
+    .border-black { border-color: #000; }
+    [class~="border-[#111]"] { border-color: #111; }
+    [class~="border-[#222]"] { border-color: #222; }
+    [class~="border-[#444]"] { border-color: #444; }
+    .border-gray-500 { border-color: #6b7280; }
+    .border-gray-600 { border-color: #4b5563; }
+    .border-gray-700 { border-color: #374151; }
+    .border-b-gray-200 { border-bottom-color: #e5e7eb; }
+    .border-r-gray-200 { border-right-color: #e5e7eb; }
+
+    .bg-black { background-color: #000; }
+    [class~="bg-[#111]"] { background-color: #111; }
+    [class~="bg-[#333]"] { background-color: #333; }
+    [class~="bg-[#b0b0b0]"] { background-color: #b0b0b0; }
+    [class~="bg-[#cc0000]"] { background-color: #c00; }
+    [class~="bg-[#dce6dc]"] { background-color: #dce6dc; }
+    [class~="bg-[#f2f2f2]"] { background-color: #f2f2f2; }
+    .bg-blue-600 { background-color: #2563eb; }
+    .bg-gray-200 { background-color: #e5e7eb; }
+    .bg-gray-300 { background-color: #d1d5db; }
+    .bg-gray-400 { background-color: #9ca3af; }
+    .bg-red-600 { background-color: #dc2626; }
+    .bg-red-900 { background-color: #7f1d1d; }
+    .from-gray-200 { --tw-gradient-from: #e5e7eb; }
+    .from-white\/60 { --tw-gradient-from: rgba(255,255,255,0.6); }
+    .to-gray-400 { --tw-gradient-to: #9ca3af; }
+    .to-transparent { --tw-gradient-to: transparent; }
+    .bg-gradient-to-b {
+      background-image: linear-gradient(to bottom, var(--tw-gradient-from, #e5e7eb), var(--tw-gradient-to, #9ca3af));
+    }
+    .bg-gradient-to-br {
+      background-image: linear-gradient(to bottom right, var(--tw-gradient-from, rgba(255,255,255,0.6)), var(--tw-gradient-to, transparent));
+    }
+
+    .shadow-md { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1); }
+    .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1); }
+    [class~="shadow-[0_0_8px_#ff0000]"] { box-shadow: 0 0 8px #f00; }
+
+    .text-center { text-align: center; }
+    .text-xs { font-size: 0.75rem; line-height: 1rem; }
+    .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+    .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+    .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+    .text-6xl { font-size: 3.75rem; line-height: 1; }
+    [class~="text-[10px]"] { font-size: 10px; }
+    [class~="text-[11px]"] { font-size: 11px; }
+    [class~="text-[#111]"] { color: #111; }
+    .font-bold { font-weight: 700; }
+    .font-sans { font-family: Arial, Helvetica, sans-serif; }
+    .leading-tight { line-height: 1.25; }
+    .tracking-widest { letter-spacing: 0.1em; }
+    .uppercase { text-transform: uppercase; }
+    @media (min-width: 768px) {
+      [class~="md:text-3xl"] {
+        font-size: 1.875rem;
+        line-height: 2.25rem;
+      }
+    }
+
+    .toggle-switch > div {
+      transform: rotate(0deg) translateY(0);
+    }
+    .toggle-switch[data-state="on"] > div {
+      transform: rotate(180deg) translateY(0.5rem) !important;
+    }
+  </style>
 <style data-purpose="custom-fonts">
     @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
     .font-digital {
@@ -543,9 +770,9 @@
 <div class="absolute left-[5%] top-[20%] -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="rect-in-plus" title="Rectified input +"><div class="w-4 h-4 rounded-full bg-[#cc0000] border border-[#111] flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div></div>
 <!-- Input - -->
 <div class="absolute left-[5%] top-[80%] -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="rect-in-minus" title="Rectified input -"><div class="w-4 h-4 rounded-full bg-[#111] border border-black flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div></div>
-<!-- Mid Red Jacks -->
-<div class="absolute left-[45%] top-[20%] -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="dc-link-left" title="DC link left"><div class="w-4 h-4 rounded-full bg-[#cc0000] border border-[#111] flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div></div>
-<div class="absolute left-[50%] top-[20%] -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="dc-link-right" title="DC link right"><div class="w-4 h-4 rounded-full bg-[#cc0000] border border-[#111] flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div></div>
+<!-- DC Link Jacks -->
+<div class="absolute left-[35%] top-[20%] -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="dc-link-left" title="DC link left"><div class="w-4 h-4 rounded-full bg-[#cc0000] border border-[#111] flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div></div>
+<div class="absolute left-[55%] top-[20%] -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="dc-link-right" title="DC link right"><div class="w-4 h-4 rounded-full bg-[#cc0000] border border-[#111] flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div></div>
 <!-- Pre-mA Red Jack -->
 <div class="absolute left-[59%] top-[20%] -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="main-ma-in" title="mA input +"><div class="w-4 h-4 rounded-full bg-[#cc0000] border border-[#111] flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div></div>
 <!-- Post-mA Black Jack -->
