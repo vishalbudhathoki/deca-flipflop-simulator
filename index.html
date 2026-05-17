@@ -1,0 +1,2372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Digital Electronics Trainer</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <style data-purpose="custom-fonts">
+    @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Roboto+Mono:wght@500;700&display=swap');
+  </style>
+  <style data-purpose="trainer-kit-styles">
+    body {
+      background-color: #e0e0e0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      font-family: 'Oswald', sans-serif;
+    }
+    .trainer-panel {
+      background-color: #e6e4d8;
+      border-radius: 12px;
+      box-shadow:
+        inset 0 0 20px rgba(0, 0, 0, 0.05),
+        5px 5px 15px rgba(0, 0, 0, 0.3),
+        -2px -2px 10px rgba(255, 255, 255, 0.8);
+      border: 3px solid #333;
+      padding: 10px;
+      width: 100%;
+      max-width: 1200px;
+      position: relative;
+    }
+    .top-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-bottom: 2px solid #333;
+    }
+    .middle-section {
+      display: grid;
+      grid-template-columns: auto 1fr 1fr 1fr auto auto auto;
+      border-bottom: 2px solid #333;
+    }
+    .bottom-section {
+      display: grid;
+      grid-template-columns: auto auto 1fr auto auto;
+    }
+    .border-b-dark {
+      border-bottom: 2px solid #333;
+    }
+    .border-r-dark {
+      border-right: 2px solid #333;
+    }
+    .border-l-dark {
+      border-left: 2px solid #333;
+    }
+    .border-t-dark {
+      border-top: 2px solid #333;
+    }
+    .title-text {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #111;
+    }
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 4px;
+      color: #111;
+    }
+    .small-label {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      color: #111;
+    }
+    .connection-point {
+      width: 12px;
+      height: 12px;
+      background: radial-gradient(circle at 30% 30%, #666, #222);
+      border-radius: 50%;
+      border: 2px solid #ccc;
+      box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+    .connection-point::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 4px;
+      height: 4px;
+      background-color: #000;
+      border-radius: 50%;
+    }
+    .led-green {
+      width: 14px;
+      height: 14px;
+      background: radial-gradient(circle at 30% 30%, #8f8, #0a0);
+      border-radius: 50%;
+      box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
+      border: 1px solid #060;
+    }
+    .led-green.on {
+      background: radial-gradient(circle at 30% 30%, #fff, #0f0, #0a0);
+      box-shadow: 0 0 10px #0f0, inset 0 -2px 4px rgba(0, 0, 0, 0.4);
+    }
+    .led-red {
+      width: 14px;
+      height: 14px;
+      background: radial-gradient(circle at 30% 30%, #f88, #a00);
+      border-radius: 50%;
+      box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
+      border: 1px solid #600;
+    }
+    .toggle-switch {
+      width: 24px;
+      height: 36px;
+      background-color: #999;
+      border-radius: 4px;
+      position: relative;
+      box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.3), inset -2px -2px 5px rgba(255, 255, 255, 0.3);
+      border: 2px solid #777;
+    }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      left: 2px;
+      right: 2px;
+      height: 16px;
+      background: linear-gradient(to bottom, #f0f0f0, #ccc);
+      border-radius: 2px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    .ic-chip {
+      background-color: #222;
+      border-radius: 2px;
+      position: relative;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+      border: 1px solid #111;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 2px 0;
+    }
+    .ic-pin-row {
+      display: flex;
+      justify-content: space-evenly;
+      width: 100%;
+    }
+    .ic-pin {
+      width: 3px;
+      height: 4px;
+      background-color: #ccc;
+    }
+    .zif-socket {
+      background-color: #a8d5ba;
+      border-radius: 4px;
+      border: 1px solid #8ab89d;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+      padding: 10px 5px;
+      position: relative;
+    }
+    .zif-lever {
+      position: absolute;
+      top: -15px;
+      left: 5px;
+      width: 6px;
+      height: 25px;
+      background-color: #7bc19a;
+      border-radius: 3px;
+      transform-origin: bottom center;
+      transform: rotate(-10deg);
+      box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+    .rocker-switch {
+      width: 30px;
+      height: 40px;
+      background-color: #111;
+      border-radius: 4px;
+      padding: 2px;
+      box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.2), inset -1px -1px 3px rgba(0, 0, 0, 0.8);
+    }
+    .rocker-switch-inner {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, #d00, #a00);
+      border-radius: 2px;
+      position: relative;
+      box-shadow: inset 0 2px 2px rgba(255, 100, 100, 0.5), inset 0 -2px 2px rgba(0, 0, 0, 0.5);
+    }
+    .rocker-switch-inner::after {
+      content: '';
+      position: absolute;
+      top: 5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 8px;
+      background-color: #fff;
+    }
+    .dial-knob {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #f0f0f0, #ccc);
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4), inset -1px -1px 5px rgba(0, 0, 0, 0.2);
+      position: relative;
+      border: 1px solid #999;
+    }
+    .dial-indicator {
+      position: absolute;
+      top: 5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 15px;
+      background-color: #333;
+      border-radius: 2px;
+    }
+    .breadboard {
+      background-color: #f8f8f8;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-shadow: inset 1px 1px 5px rgba(0, 0, 0, 0.05), 2px 2px 5px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .bb-row {
+      display: flex;
+      gap: 15px;
+    }
+    .bb-block {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      width: calc(100% / 2 - 7.5px);
+    }
+    .bb-hole {
+      width: 6px;
+      height: 6px;
+      background-color: #333;
+      border-radius: 50%;
+      box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.8);
+    }
+    .seven-segment {
+      background-color: #222;
+      padding: 5px;
+      border-radius: 4px;
+      display: inline-block;
+      box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.8);
+    }
+    .seg-digit {
+      color: #333;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 40px;
+      line-height: 1;
+      text-shadow: 0 0 2px #555;
+    }
+    .speaker-grill {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #222;
+      box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.8), 1px 1px 2px rgba(255, 255, 255, 0.5);
+      background-image: radial-gradient(#111 20%, transparent 20%);
+      background-size: 4px 4px;
+    }
+    .gate-diagram {
+      width: 60px;
+      height: 40px;
+      position: relative;
+    }
+    .gate-svg {
+      width: 100%;
+      height: 100%;
+      stroke: #000;
+      stroke-width: 2;
+      fill: none;
+    }
+  </style>
+  <style>
+    .physical-socket {
+      width: 10px;
+      height: 10px;
+      background: radial-gradient(circle at 30% 30%, #444, #111);
+      border-radius: 50%;
+      border: 1px solid #888;
+      box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.8), 0.5px 0.5px 1px rgba(255, 255, 255, 0.2);
+      position: absolute;
+      z-index: 5;
+    }
+  </style>
+  <style data-purpose="simulator-interactions">
+    :root {
+      --live-green: #36ff57;
+      --live-red: #ff2b2b;
+      --live-amber: #ffbd2e;
+      --patched-blue: #2a7fff;
+      --panel-ink: #151515;
+    }
+    .is-interactive,
+    .toggle-switch,
+    .rocker-switch,
+    .dial-knob,
+    .connection-point,
+    .physical-socket,
+    .bb-hole,
+    .zif-lever,
+    .zif-socket .bg-gray-800,
+    .speaker-grill,
+    .flip-flop-box,
+    .gate-module {
+      cursor: pointer;
+      user-select: none;
+      transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease, opacity 140ms ease, background 140ms ease;
+    }
+    .is-interactive:focus-visible,
+    .toggle-switch:focus-visible,
+    .rocker-switch:focus-visible,
+    .dial-knob:focus-visible,
+    .connection-point:focus-visible,
+    .physical-socket:focus-visible,
+    .bb-hole:focus-visible,
+    .speaker-grill:focus-visible {
+      outline: 2px solid var(--patched-blue);
+      outline-offset: 3px;
+    }
+    .led-green,
+    .led-red {
+      opacity: 0.42;
+      filter: saturate(0.75) brightness(0.75);
+    }
+    .led-green.on {
+      opacity: 1;
+      filter: saturate(1.5) brightness(1.25);
+      background: radial-gradient(circle at 30% 30%, #fff, #0f0, #0a0);
+      box-shadow: 0 0 12px rgba(30, 255, 55, 0.9), inset 0 -2px 4px rgba(0, 0, 0, 0.4);
+    }
+    .led-red.on {
+      opacity: 1;
+      filter: saturate(1.4) brightness(1.25);
+      background: radial-gradient(circle at 30% 30%, #fff, #ff4a4a, #a00);
+      box-shadow: 0 0 12px rgba(255, 35, 35, 0.85), inset 0 -2px 4px rgba(0, 0, 0, 0.4);
+    }
+    .toggle-switch.on::after {
+      top: 2px;
+      bottom: auto;
+      background: linear-gradient(to bottom, #ffffff, #e8f6e9);
+    }
+    .toggle-switch.on {
+      background-color: #7fac7f;
+      border-color: #4d7a4d;
+    }
+    .rocker-switch.on .rocker-switch-inner {
+      background: linear-gradient(to bottom, #20d34f, #058021);
+      box-shadow: inset 0 2px 2px rgba(180, 255, 190, 0.6), inset 0 -2px 2px rgba(0, 0, 0, 0.5), 0 0 12px rgba(31, 221, 73, 0.5);
+    }
+    .rocker-switch.on .rocker-switch-inner::after {
+      top: auto;
+      bottom: 5px;
+    }
+    .dial-knob {
+      transform-origin: center;
+    }
+    .clock-lamp.on {
+      box-shadow: 0 0 14px rgba(255, 40, 40, 0.95), inset 0 -2px 4px rgba(0, 0, 0, 0.45);
+      filter: brightness(1.35);
+    }
+    .connection-point.on,
+    .physical-socket.on {
+      border-color: #f8fff8;
+      box-shadow: 0 0 10px rgba(31, 255, 69, 0.85), inset 1px 1px 2px rgba(0, 0, 0, 0.8);
+    }
+    .connection-point.patched,
+    .physical-socket.patched {
+      border-color: #d8e8ff;
+      box-shadow: 0 0 10px rgba(42, 127, 255, 0.85), inset 1px 1px 2px rgba(0, 0, 0, 0.8);
+    }
+    .connection-point.wire-endpoint,
+    .physical-socket.wire-endpoint {
+      z-index: 40;
+    }
+    .connection-point.wire-source,
+    .physical-socket.wire-source {
+      border-color: #ffcaca;
+    }
+    .connection-point.wire-destination,
+    .physical-socket.wire-destination {
+      border-color: #cfe1ff;
+    }
+    .connection-point.wired,
+    .physical-socket.wired {
+      border-color: #ffefef;
+      box-shadow: 0 0 8px rgba(255, 30, 30, 0.75), inset 1px 1px 2px rgba(0, 0, 0, 0.8);
+    }
+    .connection-point.wire-pending,
+    .physical-socket.wire-pending {
+      transform: scale(1.22);
+      border-color: #fff;
+      box-shadow: 0 0 0 3px rgba(255, 189, 46, 0.45), 0 0 14px rgba(255, 189, 46, 0.9), inset 1px 1px 2px rgba(0, 0, 0, 0.8);
+    }
+    .input-output-jack {
+      margin-top: -2px;
+    }
+    .aux-output-jack {
+      width: 10px;
+      height: 10px;
+      flex: 0 0 auto;
+    }
+    .patch-wire-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+      z-index: 25;
+    }
+    .patch-wire {
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.28));
+    }
+    .patch-plug {
+      filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.35));
+    }
+    .gate-module.active {
+      background: rgba(255, 246, 195, 0.72);
+      box-shadow: inset 0 0 0 2px rgba(255, 189, 46, 0.45);
+    }
+    .gate-svg.on {
+      stroke: #058020;
+      filter: drop-shadow(0 0 3px rgba(33, 255, 73, 0.75));
+    }
+    .ic-chip.powered {
+      box-shadow: 0 0 10px rgba(255, 189, 46, 0.45), 2px 2px 5px rgba(0, 0, 0, 0.5);
+    }
+    .sim-readout {
+      min-height: 14px;
+      margin-top: 4px;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 9px;
+      line-height: 1.2;
+      color: var(--panel-ink);
+      text-align: center;
+      white-space: nowrap;
+    }
+    .signal-label {
+      min-height: 10px;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 8px;
+      line-height: 1;
+      color: #333;
+      text-align: center;
+    }
+    .flip-flop-box.active {
+      background: #fff8c7;
+      box-shadow: 0 0 0 2px rgba(255, 189, 46, 0.45), 0 0 10px rgba(255, 189, 46, 0.35);
+    }
+    .zif-socket.locked {
+      background-color: #95d0ae;
+      box-shadow: 0 0 12px rgba(31, 221, 73, 0.35), 2px 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    .zif-lever.locked {
+      transform: rotate(16deg);
+    }
+    .zif-socket .bg-gray-800.on {
+      background-color: var(--live-green) !important;
+      box-shadow: 0 0 6px rgba(31, 255, 69, 0.9);
+    }
+    .bb-hole.active {
+      background-color: var(--patched-blue);
+      box-shadow: 0 0 8px rgba(42, 127, 255, 0.85), inset 1px 1px 2px rgba(0, 0, 0, 0.55);
+      transform: scale(1.12);
+    }
+    .speaker-grill.on {
+      box-shadow: 0 0 14px rgba(255, 189, 46, 0.85), inset 2px 2px 5px rgba(0, 0, 0, 0.8), 1px 1px 2px rgba(255, 255, 255, 0.5);
+    }
+    .seven-segment {
+      width: 76px;
+      min-height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .seven-digit {
+      position: relative;
+      width: 58px;
+      height: 88px;
+    }
+    .segment {
+      position: absolute;
+      opacity: 0.24;
+      background: #5a0d0d;
+      border-radius: 999px;
+      transition: opacity 120ms ease, background 120ms ease, box-shadow 120ms ease;
+    }
+    .segment.on {
+      opacity: 1;
+      background: #ff2f24;
+      box-shadow: 0 0 10px rgba(255, 47, 36, 0.9), 0 0 2px #fff inset;
+    }
+    .seg-a,
+    .seg-d,
+    .seg-g {
+      left: 13px;
+      width: 32px;
+      height: 8px;
+    }
+    .seg-a {
+      top: 5px;
+    }
+    .seg-g {
+      top: 40px;
+    }
+    .seg-d {
+      bottom: 5px;
+    }
+    .seg-b,
+    .seg-c,
+    .seg-e,
+    .seg-f {
+      width: 8px;
+      height: 31px;
+    }
+    .seg-b {
+      top: 10px;
+      right: 6px;
+    }
+    .seg-c {
+      bottom: 10px;
+      right: 6px;
+    }
+    .seg-e {
+      bottom: 10px;
+      left: 6px;
+    }
+    .seg-f {
+      top: 10px;
+      left: 6px;
+    }
+    .decimal-dot {
+      position: absolute;
+      right: -1px;
+      bottom: 5px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      opacity: 0.22;
+      background: #5a0d0d;
+    }
+    .decimal-dot.on {
+      opacity: 1;
+      background: #ff2f24;
+      box-shadow: 0 0 8px rgba(255, 47, 36, 0.9);
+    }
+    .power-off .gate-module.active,
+    .power-off .flip-flop-box.active,
+    .power-off .ic-chip.powered,
+    .power-off .speaker-grill.on {
+      box-shadow: none;
+    }
+    .power-off .segment.on,
+    .power-off .decimal-dot.on,
+    .power-off .connection-point.on,
+    .power-off .physical-socket.on {
+      opacity: 0.2;
+      box-shadow: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="trainer-panel">
+    <div class="flex justify-between items-end pb-2 border-b-dark px-4">
+      <div class="flex flex-col">
+        <h1 class="title-text">DIGITAL ELECTRONICS TRAINER</h1>
+        <div class="flex gap-2 mt-2">
+          <button id="clear-wires-btn"
+            class="px-3 py-1 bg-red-600 text-white text-xs font-bold rounded shadow hover:bg-red-700 active:bg-red-800 transition-colors z-50 relative">CLEAR
+            ALL WIRES</button>
+          <button id="show-d-btn"
+            class="px-3 py-1 bg-blue-600 text-white text-xs font-bold rounded shadow hover:bg-blue-700 active:bg-blue-800 transition-colors z-50 relative">D
+            FF DEMO</button>
+          <button id="show-jk-btn"
+            class="px-3 py-1 bg-blue-600 text-white text-xs font-bold rounded shadow hover:bg-blue-700 active:bg-blue-800 transition-colors z-50 relative">JK
+            FF DEMO</button>
+        </div>
+      </div>
+      <h2 class="title-text text-2xl">MODEL NO.: DTK 451</h2>
+    </div>
+    <div class="top-section border-b-dark">
+      <div class="p-4 border-r-dark relative">
+        <h3 class="section-title absolute top-2 left-0 right-0">LOGIC INPUTS (0-7)</h3>
+        <div class="flex justify-between items-end h-full pt-8 px-2">
+          <div class="flex flex-col items-center gap-2">
+            <div class="led-green"></div>
+            <div class="toggle-switch" id="input_sw_0"></div>
+            <span class="small-label">0</span>
+            <div class="physical-socket relative" style="margin-top: 5px;" data-type="output" data-pin="input_0"></div>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <div class="led-green"></div>
+            <div class="toggle-switch" id="input_sw_1"></div>
+            <span class="small-label">1</span>
+            <div class="physical-socket relative" style="margin-top: 5px;" data-type="output" data-pin="input_1"></div>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <div class="led-green"></div>
+            <div class="toggle-switch" id="input_sw_2"></div>
+            <span class="small-label">2</span>
+            <div class="physical-socket relative" style="margin-top: 5px;" data-type="output" data-pin="input_2"></div>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <div class="led-green"></div>
+            <div class="toggle-switch" id="input_sw_3"></div>
+            <span class="small-label">3</span>
+            <div class="physical-socket relative" style="margin-top: 5px;" data-type="output" data-pin="input_3"></div>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <div class="led-green"></div>
+            <div class="toggle-switch" id="input_sw_4"></div>
+            <span class="small-label">4</span>
+            <div class="physical-socket relative" style="margin-top: 5px;" data-type="output" data-pin="input_4"></div>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <div class="led-green"></div>
+            <div class="toggle-switch" id="input_sw_5"></div>
+            <span class="small-label">5</span>
+            <div class="physical-socket relative" style="margin-top: 5px;" data-type="output" data-pin="input_5"></div>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <div class="led-green"></div>
+            <div class="toggle-switch" id="input_sw_6"></div>
+            <span class="small-label">6</span>
+            <div class="physical-socket relative" style="margin-top: 5px;" data-type="output" data-pin="input_6"></div>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <div class="led-green"></div>
+            <div class="toggle-switch" id="input_sw_7"></div>
+            <span class="small-label">7</span>
+            <div class="physical-socket relative" style="margin-top: 5px;" data-type="output" data-pin="input_7"></div>
+          </div>
+        </div>
+      </div>
+      <div class="p-4 relative">
+        <h3 class="section-title absolute top-2 left-0 right-0">LOGIC INDICATORS</h3>
+        <div class="flex justify-between items-end h-full pt-8 px-2">
+          <div class="flex flex-col items-center gap-2">
+            <div class="connection-point" data-type="input" data-pin="indicator_0"></div>
+            <div class="led-red" id="indicator_led_0"></div>
+            <span class="small-label">0</span>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <div class="connection-point" data-type="input" data-pin="indicator_1"></div>
+            <div class="led-red" id="indicator_led_1"></div>
+            <span class="small-label">1</span>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <div class="connection-point" data-type="input" data-pin="indicator_2"></div>
+            <div class="led-red" id="indicator_led_2"></div>
+            <span class="small-label">2</span>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <div class="connection-point" data-type="input" data-pin="indicator_3"></div>
+            <div class="led-red" id="indicator_led_3"></div>
+            <span class="small-label">3</span>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <div class="connection-point" data-type="input" data-pin="indicator_4"></div>
+            <div class="led-red" id="indicator_led_4"></div>
+            <span class="small-label">4</span>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <div class="connection-point" data-type="input" data-pin="indicator_5"></div>
+            <div class="led-red" id="indicator_led_5"></div>
+            <span class="small-label">5</span>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <div class="connection-point" data-type="input" data-pin="indicator_6"></div>
+            <div class="led-red" id="indicator_led_6"></div>
+            <span class="small-label">6</span>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <div class="connection-point" data-type="input" data-pin="indicator_7"></div>
+            <div class="led-red" id="indicator_led_7"></div>
+            <span class="small-label">7</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="middle-section">
+      <div class="flex flex-col justify-around items-center p-2 border-r-dark w-16">
+        <div class="flex items-center gap-1">
+          <div class="toggle-switch" style="width:16px;height:24px;"></div>
+          <div class="led-green" style="width:10px;height:10px;"></div>
+        </div>
+        <div class="flex items-center gap-1">
+          <div class="toggle-switch" style="width:16px;height:24px;"></div>
+          <div class="led-green" style="width:10px;height:10px;"></div>
+        </div>
+        <div class="flex items-center gap-1">
+          <div class="toggle-switch" style="width:16px;height:24px;"></div>
+          <div class="led-green" style="width:10px;height:10px;"></div>
+        </div>
+        <div class="flex items-center gap-1">
+          <div class="toggle-switch" style="width:16px;height:24px;"></div>
+          <div class="led-green" style="width:10px;height:10px;"></div>
+        </div>
+      </div>
+      <div class="border-r-dark">
+        <div class="p-2 border-b-dark h-1/2 flex flex-col items-center relative">
+          <h4 class="section-title text-xs">OR GATE</h4>
+          <div class="flex items-center justify-center w-full my-2">
+            <div class="text-xs mr-1 flex flex-col items-end leading-tight"><span>O0</span><span>V2</span></div>
+            <div class="gate-diagram">
+              <svg class="gate-svg" viewbox="0 0 60 40">
+                <path d="M 10 10 L 20 10 M 10 30 L 20 30 M 50 20 L 60 20"></path>
+                <path d="M 20 5 Q 35 5 50 20 Q 35 35 20 35 Q 25 20 20 5 Z"></path>
+              </svg>
+              <div class="physical-socket" style="top: 5px; left: 0px;"></div>
+              <div class="physical-socket" style="bottom: 5px; left: 0px;"></div>
+              <div class="physical-socket" style="top: 15px; right: -5px;"></div>
+            </div>
+            <div class="text-xs ml-1 flex flex-col items-start leading-tight"><span>IC</span><span>IC 7432</span></div>
+          </div>
+          <div class="ic-chip w-24 h-8 mt-auto mb-2">
+            <div class="ic-pin-row">
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+            </div>
+            <div class="ic-pin-row">
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+            </div>
+          </div>
+        </div>
+        <div class="p-2 h-1/2 flex flex-col items-center relative">
+          <h4 class="section-title text-xs">NAND GATE</h4>
+          <div class="flex items-center justify-center w-full my-2">
+            <div class="text-xs mr-1 flex flex-col items-end leading-tight"><span>A1</span><span>A00</span></div>
+            <div class="gate-diagram">
+              <svg class="gate-svg" viewbox="0 0 60 40">
+                <path d="M 10 10 L 20 10 M 10 30 L 20 30 M 55 20 L 60 20"></path>
+                <path d="M 20 5 L 35 5 A 15 15 0 0 1 35 35 L 20 35 Z"></path>
+                <circle cx="52" cy="20" r="3"></circle>
+              </svg>
+              <div class="physical-socket" style="top: 5px; left: 0px;"></div>
+              <div class="physical-socket" style="bottom: 5px; left: 0px;"></div>
+              <div class="physical-socket" style="top: 15px; right: -5px;"></div>
+            </div>
+            <div class="text-xs ml-1 flex flex-col items-start leading-tight"><span>IC</span><span>7400</span></div>
+          </div>
+          <div class="ic-chip w-24 h-8 mt-auto mb-2">
+            <div class="ic-pin-row">
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+            </div>
+            <div class="ic-pin-row">
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="border-r-dark">
+        <div class="p-2 border-b-dark h-1/2 flex flex-col items-center relative">
+          <h4 class="section-title text-xs">AND GATE</h4>
+          <div class="flex items-center justify-center w-full my-2">
+            <div class="text-xs mr-1 flex flex-col items-end leading-tight"><span>A4</span><span>A3</span></div>
+            <div class="gate-diagram">
+              <svg class="gate-svg" viewbox="0 0 60 40">
+                <path d="M 10 10 L 20 10 M 10 30 L 20 30 M 50 20 L 60 20"></path>
+                <path d="M 20 5 L 35 5 A 15 15 0 0 1 35 35 L 20 35 Z"></path>
+              </svg>
+              <div class="physical-socket" style="top: 5px; left: 0px;"></div>
+              <div class="physical-socket" style="bottom: 5px; left: 0px;"></div>
+              <div class="physical-socket" style="top: 15px; right: -5px;"></div>
+            </div>
+            <div class="text-xs ml-1 flex flex-col items-start leading-tight"><span>IC</span><span>IC 7408</span></div>
+          </div>
+          <div class="ic-chip w-24 h-8 mt-auto mb-2">
+            <div class="ic-pin-row">
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+            </div>
+            <div class="ic-pin-row">
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+            </div>
+          </div>
+        </div>
+        <div class="p-2 h-1/2 flex flex-col items-center relative">
+          <h4 class="section-title text-xs">NOR GATE</h4>
+          <div class="flex items-center justify-center w-full my-2">
+            <div class="text-xs mr-1 flex flex-col items-end leading-tight"><span>A1</span><span>A02</span></div>
+            <div class="gate-diagram">
+              <svg class="gate-svg" viewbox="0 0 60 40">
+                <path d="M 10 10 L 20 10 M 10 30 L 20 30 M 55 20 L 60 20"></path>
+                <path d="M 20 5 Q 35 5 48 20 Q 35 35 20 35 Q 25 20 20 5 Z"></path>
+                <circle cx="51" cy="20" r="3"></circle>
+              </svg>
+              <div class="physical-socket" style="top: 5px; left: 0px;"></div>
+              <div class="physical-socket" style="bottom: 5px; left: 0px;"></div>
+              <div class="physical-socket" style="top: 15px; right: -5px;"></div>
+            </div>
+            <div class="text-xs ml-1 flex flex-col items-start leading-tight"><span>IC</span><span>IC 7402</span></div>
+          </div>
+          <div class="ic-chip w-24 h-8 mt-auto mb-2">
+            <div class="ic-pin-row">
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+            </div>
+            <div class="ic-pin-row">
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="border-r-dark">
+        <div class="p-2 border-b-dark h-1/2 flex flex-col items-center relative">
+          <h4 class="section-title text-xs">NOT GATE</h4>
+          <div class="flex items-center justify-center w-full my-2">
+            <div class="text-xs mr-1 flex flex-col items-end leading-tight"><span>A1</span></div>
+            <div class="gate-diagram">
+              <svg class="gate-svg" viewbox="0 0 60 40">
+                <path d="M 10 20 L 20 20 M 55 20 L 60 20"></path>
+                <path d="M 20 5 L 48 20 L 20 35 Z"></path>
+                <circle cx="51" cy="20" r="3"></circle>
+              </svg>
+              <div class="physical-socket" style="top: 15px; left: 0px;"></div>
+              <div class="physical-socket" style="top: 15px; right: -5px;"></div>
+            </div>
+            <div class="text-xs ml-1 flex flex-col items-start leading-tight"><span>IC</span><span>IC 7404</span></div>
+          </div>
+          <div class="ic-chip w-24 h-8 mt-auto mb-2">
+            <div class="ic-pin-row">
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+            </div>
+            <div class="ic-pin-row">
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+            </div>
+          </div>
+        </div>
+        <div class="p-2 h-1/2 flex flex-col items-center relative">
+          <h4 class="section-title text-xs">EX-OR GATE</h4>
+          <div class="flex items-center justify-center w-full my-2">
+            <div class="text-xs mr-1 flex flex-col items-end leading-tight"><span>EX</span><span>A86</span></div>
+            <div class="gate-diagram">
+              <svg class="gate-svg" viewbox="0 0 60 40">
+                <path d="M 5 10 L 15 10 M 5 30 L 15 30 M 50 20 L 60 20"></path>
+                <path d="M 20 5 Q 35 5 50 20 Q 35 35 20 35 Q 25 20 20 5 Z"></path>
+                <path d="M 16 5 Q 21 20 16 35"></path>
+              </svg>
+              <div class="physical-socket" style="top: 5px; left: -5px;"></div>
+              <div class="physical-socket" style="bottom: 5px; left: -5px;"></div>
+              <div class="physical-socket" style="top: 15px; right: -5px;"></div>
+            </div>
+            <div class="text-xs ml-1 flex flex-col items-start leading-tight"><span>IC</span><span>7486</span></div>
+          </div>
+          <div class="ic-chip w-24 h-8 mt-auto mb-2">
+            <div class="ic-pin-row">
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+            </div>
+            <div class="ic-pin-row">
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+              <div class="ic-pin"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="border-r-dark flex">
+        <div class="p-2 w-24 flex flex-col items-center text-center border-r-dark">
+          <h4 class="section-title text-xs leading-tight">4-BIT<br />BINARY<br />ADDER</h4>
+          <span class="small-label mt-2 mb-1">IC 7483</span>
+          <div class="ic-chip w-8 h-20 mb-2 mt-auto flex-row justify-between pt-0 pb-0 pl-1 pr-1">
+            <div class="flex flex-col justify-evenly h-full">
+              <div class="ic-pin" style="width:4px;height:3px;"></div>
+              <div class="ic-pin" style="width:4px;height:3px;"></div>
+              <div class="ic-pin" style="width:4px;height:3px;"></div>
+              <div class="ic-pin" style="width:4px;height:3px;"></div>
+              <div class="ic-pin" style="width:4px;height:3px;"></div>
+              <div class="ic-pin" style="width:4px;height:3px;"></div>
+              <div class="ic-pin" style="width:4px;height:3px;"></div>
+              <div class="ic-pin" style="width:4px;height:3px;"></div>
+            </div>
+            <div class="flex flex-col justify-evenly h-full">
+              <div class="ic-pin" style="width:4px;height:3px;"></div>
+              <div class="ic-pin" style="width:4px;height:3px;"></div>
+              <div class="ic-pin" style="width:4px;height:3px;"></div>
+              <div class="ic-pin" style="width:4px;height:3px;"></div>
+              <div class="ic-pin" style="width:4px;height:3px;"></div>
+              <div class="ic-pin" style="width:4px;height:3px;"></div>
+              <div class="ic-pin" style="width:4px;height:3px;"></div>
+              <div class="ic-pin" style="width:4px;height:3px;"></div>
+            </div>
+          </div>
+          <h4 class="section-title text-xs leading-tight mt-auto">4-BIT<br />BINARY<br />ADDER</h4>
+        </div>
+        <div class="p-2 w-32 flex flex-col items-center justify-center text-center">
+          <h4 class="section-title text-xs leading-tight mb-2">ZIF<br />ANY PIN<br />SOCKET<br /><span
+              class="font-normal">(28 PINS)</span></h4>
+          <div class="zif-socket w-16 h-32 flex justify-between px-2">
+            <div class="zif-lever"></div>
+            <div class="flex flex-col justify-evenly h-full">
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+            </div>
+            <div class="flex flex-col justify-evenly h-full">
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+              <div class="bg-gray-800 w-2 h-1 rounded-sm"></div>
+            </div>
+          </div>
+          <h4 class="section-title text-xs leading-tight mt-2">ZIF<br />ANY PIN<br />SOCKET<br /><span
+              class="font-normal">(28 PINS)</span></h4>
+        </div>
+      </div>
+      <div class="border-r-dark flex flex-col w-32">
+        <h4 class="section-title text-xs mt-2">D FLIP FLOP<br /><span class="font-normal">(IC 7474)</span></h4>
+        <div class="flex-grow flex flex-col items-center justify-around pb-2">
+          <div class="border-2 border-black p-1 w-16 h-16 flex items-center justify-center relative bg-white"
+            id="dff_1">
+            <span class="text-xs font-bold text-center">FLIP<br />FLOP</span>
+            <div class="absolute left-1/2 -top-4 -translate-x-1/2 text-[10px]">PRS1</div>
+            <div class="physical-socket" style="top: -14px; left: 50%; transform: translateX(-50%);" data-type="input"
+              data-pin="dff_1_prs"></div>
+            <div class="absolute -left-4 top-1 text-[10px]">D1 -</div>
+            <div class="physical-socket" style="top: 4px; left: -14px;" data-type="input" data-pin="dff_1_d"></div>
+            <div class="absolute -left-6 top-1/2 -translate-y-1/2 text-[10px]">CLK1 -</div>
+            <div class="physical-socket" style="top: 50%; transform: translateY(-50%); left: -14px;" data-type="input"
+              data-pin="dff_1_clk"></div>
+            <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px]">| CLR1</div>
+            <div class="physical-socket" style="bottom: -14px; left: 50%; transform: translateX(-50%);"
+              data-type="input" data-pin="dff_1_clr"></div>
+            <div class="absolute -right-4 top-2 text-[10px]">- Q1</div>
+            <div class="physical-socket" style="top: 8px; right: -14px;" data-type="output" data-pin="dff_1_q"></div>
+            <div class="absolute -right-5 bottom-2 text-[10px]">- Q1'</div>
+            <div class="physical-socket" style="bottom: 8px; right: -14px;" data-type="output" data-pin="dff_1_q_inv">
+            </div>
+          </div>
+          <div class="border-2 border-black p-1 w-16 h-16 flex items-center justify-center relative bg-white mt-4"
+            id="dff_2">
+            <span class="text-xs font-bold text-center">FLIP<br />FLOP</span>
+            <div class="absolute left-1/2 -top-4 -translate-x-1/2 text-[10px]">PRS2</div>
+            <div class="physical-socket" style="top: -14px; left: 50%; transform: translateX(-50%);" data-type="input"
+              data-pin="dff_2_prs"></div>
+            <div class="absolute -left-4 top-1 text-[10px]">D2 -</div>
+            <div class="physical-socket" style="top: 4px; left: -14px;" data-type="input" data-pin="dff_2_d"></div>
+            <div class="absolute -left-6 top-1/2 -translate-y-1/2 text-[10px]">CLK2 -</div>
+            <div class="physical-socket" style="top: 50%; transform: translateY(-50%); left: -14px;" data-type="input"
+              data-pin="dff_2_clk"></div>
+            <div class="absolute -right-4 top-2 text-[10px]">- Q2</div>
+            <div class="physical-socket" style="top: 8px; right: -14px;" data-type="output" data-pin="dff_2_q"></div>
+            <div class="absolute -right-4 bottom-2 text-[10px]">- Q2'</div>
+            <div class="physical-socket" style="bottom: 8px; right: -14px;" data-type="output" data-pin="dff_2_q_inv">
+            </div>
+            <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px]">| CLR2</div>
+            <div class="physical-socket" style="bottom: -14px; left: 50%; transform: translateX(-50%);"
+              data-type="input" data-pin="dff_2_clr"></div>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col w-32">
+        <h4 class="section-title text-xs mt-2">JK FLIP FLOP<br /><span class="font-normal">(IC 7476)</span></h4>
+        <div class="flex-grow flex flex-col items-center justify-around pb-2">
+          <div class="border-2 border-black p-1 w-16 h-16 flex items-center justify-center relative bg-white"
+            id="jkff_1">
+            <span class="text-xs font-bold text-center">FLIP<br />FLOP</span>
+            <div class="absolute left-1/2 -top-4 -translate-x-1/2 text-[10px]">PRS1</div>
+            <div class="physical-socket" style="top: -14px; left: 50%; transform: translateX(-50%);" data-type="input"
+              data-pin="jkff_1_prs"></div>
+            <div class="absolute -left-4 top-1 text-[10px]">J1 -</div>
+            <div class="physical-socket" style="top: 4px; left: -14px;" data-type="input" data-pin="jkff_1_j"></div>
+            <div class="absolute -left-6 top-1/2 -translate-y-1/2 text-[10px]">CLK1 -</div>
+            <div class="physical-socket" style="top: 50%; transform: translateY(-50%); left: -14px;" data-type="input"
+              data-pin="jkff_1_clk"></div>
+            <div class="absolute -left-4 bottom-1 text-[10px]">K1 -</div>
+            <div class="physical-socket" style="bottom: 4px; left: -14px;" data-type="input" data-pin="jkff_1_k"></div>
+            <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px]">| CLR1</div>
+            <div class="physical-socket" style="bottom: -14px; left: 50%; transform: translateX(-50%);"
+              data-type="input" data-pin="jkff_1_clr"></div>
+            <div class="absolute -right-4 top-2 text-[10px]">- Q1</div>
+            <div class="physical-socket" style="top: 8px; right: -14px;" data-type="output" data-pin="jkff_1_q"></div>
+            <div class="absolute -right-5 bottom-2 text-[10px]">- Q1'</div>
+            <div class="physical-socket" style="bottom: 8px; right: -14px;" data-type="output" data-pin="jkff_1_q_inv">
+            </div>
+          </div>
+          <div class="border-2 border-black p-1 w-16 h-16 flex items-center justify-center relative bg-white mt-4"
+            id="jkff_2">
+            <span class="text-xs font-bold text-center">FLIP<br />FLOP</span>
+            <div class="absolute left-1/2 -top-4 -translate-x-1/2 text-[10px]">PRS2</div>
+            <div class="physical-socket" style="top: -14px; left: 50%; transform: translateX(-50%);" data-type="input"
+              data-pin="jkff_2_prs"></div>
+            <div class="absolute -left-4 top-1 text-[10px]">J2 -</div>
+            <div class="physical-socket" style="top: 4px; left: -14px;" data-type="input" data-pin="jkff_2_j"></div>
+            <div class="absolute -left-5 top-1/2 -translate-y-1/2 text-[10px]">CLK2 -</div>
+            <div class="physical-socket" style="top: 50%; transform: translateY(-50%); left: -14px;" data-type="input"
+              data-pin="jkff_2_clk"></div>
+            <div class="absolute -left-4 bottom-1 text-[10px]">K2 -</div>
+            <div class="physical-socket" style="bottom: 4px; left: -14px;" data-type="input" data-pin="jkff_2_k"></div>
+            <div class="absolute -right-4 top-2 text-[10px]">- Q2</div>
+            <div class="physical-socket" style="top: 8px; right: -14px;" data-type="output" data-pin="jkff_2_q"></div>
+            <div class="absolute -right-4 bottom-2 text-[10px]">- Q2'</div>
+            <div class="physical-socket" style="bottom: 8px; right: -14px;" data-type="output" data-pin="jkff_2_q_inv">
+            </div>
+            <div class="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px]">| CLR2</div>
+            <div class="physical-socket" style="bottom: -14px; left: 50%; transform: translateX(-50%);"
+              data-type="input" data-pin="jkff_2_clr"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-section relative">
+      <div class="absolute -top-32 left-0 w-32 bg-[#e6e4d8] border-r-dark border-b-dark z-10 flex flex-col">
+        <div class="p-2 border-b-dark h-16 flex flex-col justify-center">
+          <div class="flex items-center justify-between px-2 mb-1">
+            <span class="small-label">+5V</span>
+            <div class="connection-point w-3 h-3 relative">
+              <div class="physical-socket" style="top:50%;left:50%;transform:translate(-50%,-50%);" data-type="output"
+                data-pin="vcc_1"></div>
+            </div>
+            <div class="connection-point w-3 h-3 relative">
+              <div class="physical-socket" style="top:50%;left:50%;transform:translate(-50%,-50%);" data-type="output"
+                data-pin="vcc_2"></div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between px-2">
+            <span class="small-label">GND</span>
+            <div class="connection-point w-3 h-3 relative">
+              <div class="physical-socket" style="top:50%;left:50%;transform:translate(-50%,-50%);" data-type="output"
+                data-pin="gnd_1"></div>
+            </div>
+            <div class="connection-point w-3 h-3 relative">
+              <div class="physical-socket" style="top:50%;left:50%;transform:translate(-50%,-50%);" data-type="output"
+                data-pin="gnd_2"></div>
+            </div>
+          </div>
+          <div class="text-center text-xs font-bold mt-1">POWER SUPPLY</div>
+        </div>
+        <div class="p-2 flex flex-col items-center justify-center h-16">
+          <div class="flex items-center justify-around w-full px-2">
+            <div class="w-4 h-4 bg-red-600 rounded-full border border-red-800 shadow-inner"></div>
+            <div class="flex flex-col items-center">
+              <span class="small-label">+5V</span>
+              <div class="connection-point w-3 h-3"></div>
+            </div>
+          </div>
+          <div class="text-center text-xs font-bold mt-1">CLOCK PULSE</div>
+        </div>
+      </div>
+      <div class="p-4 border-r-dark flex flex-col items-center justify-center w-32 mt-0">
+        <h3 class="section-title mb-4">POWER</h3>
+        <span class="small-label mb-2">ON</span>
+        <div class="rocker-switch" id="power_switch">
+          <div class="rocker-switch-inner"></div>
+        </div>
+        <span class="small-label mt-2">OFF</span>
+      </div>
+      <div class="p-4 border-r-dark flex flex-col items-center justify-center w-40">
+        <div class="relative w-24 h-24 flex items-center justify-center mb-2">
+          <span class="absolute top-1 left-4 text-[10px] font-bold">10</span>
+          <span class="absolute top-0 left-1/2 -translate-x-1/2 text-[10px] font-bold">100</span>
+          <span class="absolute top-1 right-4 text-[10px] font-bold">1K</span>
+          <span class="absolute top-6 right-0 text-[10px] font-bold">10K</span>
+          <span class="absolute top-12 left-0 text-[10px] font-bold">OFF</span>
+          <div class="dial-knob" style="transform: rotate(-45deg);">
+            <div class="dial-indicator"></div>
+          </div>
+        </div>
+        <h3 class="section-title text-center leading-tight">SELECTOR<br />CLOCK<br />GENERATOR<br />Hz</h3>
+        <div class="flex justify-around w-full mt-2">
+          <div class="flex flex-col items-center"><span class="small-label">GND</span>
+            <div class="connection-point w-3 h-3 mt-1"></div>
+          </div>
+          <div class="flex flex-col items-center"><span class="small-label">CLK</span>
+            <div class="connection-point w-3 h-3 mt-1 relative">
+              <div class="physical-socket" style="top:50%;left:50%;transform:translate(-50%,-50%);" data-type="output"
+                data-pin="clock_out"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="p-4 flex flex-col">
+        <div
+          class="absolute left-[18.5rem] top-1/2 -translate-y-1/2 -rotate-90 text-[10px] font-bold whitespace-nowrap tracking-widest text-gray-700">
+          LOGIC LEVEL POTENTIOMETERS
+        </div>
+        <div class="breadboard flex-grow ml-4">
+          <div class="bb-row">
+            <div class="bb-block">
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+            </div>
+            <div class="bb-block">
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+            </div>
+            <div class="bb-block">
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+            </div>
+            <div class="bb-block">
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+            </div>
+          </div>
+          <div class="bb-row">
+            <div class="bb-block">
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+            </div>
+            <div class="bb-block">
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+            </div>
+            <div class="bb-block">
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+            </div>
+            <div class="bb-block">
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+            </div>
+          </div>
+          <div class="w-full h-2 bg-gray-200 my-1 rounded-full border border-gray-300"></div>
+          <div class="flex flex-col gap-1 overflow-hidden h-24">
+            <div class="bb-row">
+              <div class="flex gap-1 w-full justify-between px-1">
+                <div class="flex flex-col gap-1">
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                </div>
+                <div class="flex flex-col gap-1">
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                  <div class="bb-hole"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="w-full h-2 bg-gray-200 my-1 rounded-full border border-gray-300"></div>
+          <div class="bb-row">
+            <div class="bb-block">
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+            </div>
+            <div class="bb-block">
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+            </div>
+            <div class="bb-block">
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+            </div>
+            <div class="bb-block">
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+            </div>
+          </div>
+          <div class="bb-row">
+            <div class="bb-block">
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+            </div>
+            <div class="bb-block">
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+            </div>
+            <div class="bb-block">
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+            </div>
+            <div class="bb-block">
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+              <div class="bb-hole"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="p-4 border-l-dark border-r-dark flex flex-col items-center w-32 justify-between">
+        <div class="flex justify-between w-full px-2 mb-2">
+          <div class="flex flex-col items-center"><span class="small-label">A</span>
+            <div class="connection-point w-3 h-3"></div>
+          </div>
+          <div class="flex flex-col items-center"><span class="small-label">B</span>
+            <div class="connection-point w-3 h-3"></div>
+          </div>
+          <div class="flex flex-col items-center"><span class="small-label">C</span>
+            <div class="connection-point w-3 h-3"></div>
+          </div>
+          <div class="flex flex-col items-center"><span class="small-label">D</span>
+            <div class="connection-point w-3 h-3"></div>
+          </div>
+        </div>
+        <div class="seven-segment mt-2 mb-4">
+          <span class="seg-digit">8.</span>
+        </div>
+        <div class="ic-chip w-16 h-6 mb-2">
+          <div class="ic-pin-row">
+            <div class="ic-pin"></div>
+            <div class="ic-pin"></div>
+            <div class="ic-pin"></div>
+            <div class="ic-pin"></div>
+            <div class="ic-pin"></div>
+          </div>
+          <div class="ic-pin-row">
+            <div class="ic-pin"></div>
+            <div class="ic-pin"></div>
+            <div class="ic-pin"></div>
+            <div class="ic-pin"></div>
+            <div class="ic-pin"></div>
+          </div>
+        </div>
+        <h3 class="section-title text-xs leading-tight">BCD TO 7 SEGMENT<br />DECODER</h3>
+      </div>
+      <div class="p-4 flex flex-col items-center w-32 justify-between">
+        <h3 class="section-title text-center leading-tight mt-2">CONTINUITY<br />TESTER</h3>
+        <div class="connection-point w-4 h-4 mt-4"></div>
+        <div class="speaker-grill mt-8 mb-4"></div>
+        <h3 class="section-title text-center leading-tight">CONTINUITY<br />TESTER</h3>
+      </div>
+    </div>
+  </div>
+  <script data-purpose="trainer-simulator">
+    (() => {
+      'use strict';
+      const trainer = document.querySelector('.trainer-panel');
+      const handledPoints = new WeakSet();
+      const handledSockets = new WeakSet();
+      const state = {
+        power: true,
+        inputs: [true, false, true, true, true, true, true, false],
+        aux: Array(4).fill(false),
+        gateOutputs: {},
+        wires: [],
+        pendingEndpoint: null,
+        nextWireId: 1,
+        adder: { a: 0, b: 0, sum: 0, carry: false },
+        clock: { step: 0, high: false, interval: null, pulseTimer: null },
+        dffs: [
+          { kind: 'D', label: 'D1', prefix: 'dff_1', q: false, lastClk: false },
+          { kind: 'D', label: 'D2', prefix: 'dff_2', q: false, lastClk: false }
+        ],
+        jkffs: [
+          { kind: 'JK', label: 'JK1', prefix: 'jkff_1', q: true, lastClk: false },
+          { kind: 'JK', label: 'JK2', prefix: 'jkff_2', q: false, lastClk: false }
+        ],
+        zifLocked: false,
+        zifPins: [],
+        holeStates: [],
+        speakerArmed: true,
+        lastBeepAt: 0
+      };
+      const clockSteps = [
+        { label: 'OFF', angle: -95, period: 0 },
+        { label: '10', angle: -45, period: 1200 },
+        { label: '100', angle: 0, period: 820 },
+        { label: '1K', angle: 42, period: 520 },
+        { label: '10K', angle: 82, period: 260 }
+      ];
+      const gateDefinitions = [
+        { key: 'OR', title: 'OR GATE', pins: 2, fn: values => values[0] || values[1] },
+        { key: 'AND', title: 'AND GATE', pins: 2, fn: values => values[0] && values[1] },
+        { key: 'NOT', title: 'NOT GATE', pins: 1, fn: values => !values[0] },
+        { key: 'NAND', title: 'NAND GATE', pins: 2, fn: values => !(values[0] && values[1]) },
+        { key: 'NOR', title: 'NOR GATE', pins: 2, fn: values => !(values[0] || values[1]) },
+        { key: 'XOR', title: 'EX-OR GATE', pins: 2, fn: values => values[0] !== values[1] }
+      ];
+      const wireColors = ['#d71c2c', '#c01624', '#e2442f', '#111111', '#b31b1b', '#d82d42'];
+      const endpoints = new Map();
+      let wireLayer = null;
+      const segmentMap = {
+        0: ['a', 'b', 'c', 'd', 'e', 'f'],
+        1: ['b', 'c'],
+        2: ['a', 'b', 'd', 'e', 'g'],
+        3: ['a', 'b', 'c', 'd', 'g'],
+        4: ['b', 'c', 'f', 'g'],
+        5: ['a', 'c', 'd', 'f', 'g'],
+        6: ['a', 'c', 'd', 'e', 'f', 'g'],
+        7: ['a', 'b', 'c'],
+        8: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
+        9: ['a', 'b', 'c', 'd', 'f', 'g']
+      };
+      function $(selector, root) {
+        if (arguments.length === 1) root = document;
+        return root ? root.querySelector(selector) : null;
+      }
+      function $$(selector, root) {
+        if (arguments.length === 1) root = document;
+        return root ? Array.from(root.querySelectorAll(selector)) : [];
+      }
+      const normalize = element => (element?.textContent || '').replace(/\s+/g, ' ').trim().toUpperCase();
+      const compactLabel = value => String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const liveInput = index => state.power && state.inputs[index];
+      const setOn = (element, on) => element?.classList.toggle('on', Boolean(on));
+      function makeInteractive(element, label, handler) {
+        if (!element) return;
+        element.classList.add('is-interactive');
+        element.setAttribute('role', 'button');
+        element.setAttribute('tabindex', '0');
+        if (label) element.setAttribute('aria-label', label);
+        if (!handler) return;
+        element.addEventListener('click', event => handler(event));
+        element.addEventListener('keydown', event => {
+          if (event.key !== 'Enter' && event.key !== ' ') return;
+          event.preventDefault();
+          handler(event);
+        });
+      }
+      function findModuleByTitle(title) {
+        const target = compactLabel(title);
+        const heading = $$('.middle-section h4').find(element => compactLabel(element.textContent).startsWith(target));
+        if (!heading) return null;
+        return heading.closest('.p-2') || heading.parentElement;
+      }
+      function createWireLayer() {
+        wireLayer = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        wireLayer.classList.add('patch-wire-layer');
+        wireLayer.setAttribute('aria-hidden', 'true');
+        trainer?.appendChild(wireLayer);
+      }
+      function registerEndpoint(element, options) {
+        if (!element || !options?.id) return;
+        const endpoint = {
+          id: options.id,
+          element,
+          type: options.type,
+          label: options.label || options.id,
+          shortLabel: options.shortLabel || options.label || options.id,
+          signal: options.signal || null
+        };
+        endpoints.set(endpoint.id, endpoint);
+        element.dataset.endpointId = endpoint.id;
+        element.classList.add('wire-endpoint', endpoint.type === 'source' ? 'wire-source' : 'wire-destination');
+        makeInteractive(element, endpoint.label, event => {
+          event.stopPropagation();
+          handleEndpointClick(endpoint.id);
+        });
+      }
+      function getWireForDestination(destinationId) {
+        return state.wires.find(wire => wire.destinationId === destinationId) || null;
+      }
+      function getSourceSignal(sourceId, visited = new Set()) {
+        const endpoint = endpoints.get(sourceId);
+        if (!endpoint) return false;
+        if (endpoint.type === 'source') return Boolean(endpoint.signal?.());
+        return readWiredInput(sourceId, visited);
+      }
+      function readWiredInput(destinationId, visited = new Set()) {
+        if (visited.has(destinationId)) return false;
+        visited.add(destinationId);
+        const wire = getWireForDestination(destinationId);
+        return wire ? getSourceSignal(wire.sourceId, visited) : false;
+      }
+      function readActiveLowInput(destinationId, visited = new Set()) {
+        if (visited.has(destinationId)) return true;
+        visited.add(destinationId);
+        const wire = getWireForDestination(destinationId);
+        return wire ? getSourceSignal(wire.sourceId, visited) : true;
+      }
+      function isActiveLowAsserted(destinationId) {
+        return !readActiveLowInput(destinationId);
+      }
+      function getEndpointLiveValue(endpoint) {
+        if (endpoint.type === 'source') return getSourceSignal(endpoint.id);
+        return readWiredInput(endpoint.id);
+      }
+      function getConnectionPair(first, second) {
+        const a = endpoints.get(first);
+        const b = endpoints.get(second);
+        if (!a || !b) return null;
+        if (a.type === 'source' && b.type === 'destination') return { source: a, destination: b };
+        if (a.type === 'destination' && b.type === 'source') return { source: b, destination: a };
+        if (a.type === 'destination' && b.type === 'destination') return { source: a, destination: b };
+        return null;
+      }
+      function handleEndpointClick(endpointId) {
+        const endpoint = endpoints.get(endpointId);
+        if (!endpoint) return;
+        if (!state.pendingEndpoint) {
+          if (endpoint.type === 'destination' && getWireForDestination(endpointId)) {
+            state.wires = state.wires.filter(wire => wire.destinationId !== endpointId);
+            updateAll();
+            return;
+          }
+          state.pendingEndpoint = endpointId;
+          updateWiringVisuals();
+          return;
+        }
+        if (state.pendingEndpoint === endpointId) {
+          state.pendingEndpoint = null;
+          updateWiringVisuals();
+          return;
+        }
+        const pair = getConnectionPair(state.pendingEndpoint, endpointId);
+        if (!pair) {
+          state.pendingEndpoint = endpointId;
+          updateWiringVisuals();
+          return;
+        }
+        connectWire(pair.source.id, pair.destination.id);
+        state.pendingEndpoint = null;
+        updateAll();
+      }
+      function connectWire(sourceId, destinationId, color) {
+        if (!endpoints.has(sourceId) || !endpoints.has(destinationId)) return;
+        state.wires = state.wires.filter(wire => wire.destinationId !== destinationId);
+        state.wires.push({
+          id: `wire-${state.nextWireId++}`,
+          sourceId,
+          destinationId,
+          color: color || wireColors[(state.nextWireId - 2) % wireColors.length]
+        });
+      }
+      function endpointCenter(element, panelRect) {
+        const rect = element.getBoundingClientRect();
+        return {
+          x: rect.left - panelRect.left + rect.width / 2,
+          y: rect.top - panelRect.top + rect.height / 2
+        };
+      }
+      function wirePath(source, destination) {
+        const distance = Math.hypot(destination.x - source.x, destination.y - source.y);
+        const lift = Math.min(190, Math.max(45, distance * 0.28));
+        const skew = Math.max(-70, Math.min(70, (destination.x - source.x) * 0.12));
+        return `M ${source.x.toFixed(1)} ${source.y.toFixed(1)} C ${(source.x + skew).toFixed(1)} ${(source.y - lift).toFixed(1)}, ${(destination.x - skew).toFixed(1)} ${(destination.y - lift).toFixed(1)}, ${destination.x.toFixed(1)} ${destination.y.toFixed(1)}`;
+      }
+      function drawWires() {
+        if (!wireLayer || !trainer) return;
+        const panelRect = trainer.getBoundingClientRect();
+        wireLayer.setAttribute('viewBox', `0 0 ${panelRect.width} ${panelRect.height}`);
+        wireLayer.replaceChildren();
+        state.wires.forEach(wire => {
+          const source = endpoints.get(wire.sourceId);
+          const destination = endpoints.get(wire.destinationId);
+          if (!source?.element || !destination?.element) return;
+          const start = endpointCenter(source.element, panelRect);
+          const end = endpointCenter(destination.element, panelRect);
+          const active = getSourceSignal(wire.sourceId);
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.classList.add('patch-wire');
+          path.setAttribute('d', wirePath(start, end));
+          path.setAttribute('stroke', active ? wire.color : '#6f1a1f');
+          path.setAttribute('stroke-width', active ? '6' : '5');
+          path.setAttribute('opacity', active ? '0.96' : '0.74');
+          wireLayer.appendChild(path);
+          [start, end].forEach(point => {
+            const plug = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            plug.classList.add('patch-plug');
+            plug.setAttribute('cx', point.x);
+            plug.setAttribute('cy', point.y);
+            plug.setAttribute('r', active ? '7' : '6');
+            plug.setAttribute('fill', active ? wire.color : '#8c2228');
+            plug.setAttribute('stroke', '#3a0709');
+            plug.setAttribute('stroke-width', '1.5');
+            wireLayer.appendChild(plug);
+          });
+        });
+      }
+      function updateWiringVisuals() {
+        endpoints.forEach(endpoint => {
+          const wired = endpoint.type === 'source'
+            ? state.wires.some(wire => wire.sourceId === endpoint.id)
+            : state.wires.some(wire => wire.destinationId === endpoint.id);
+          const live = getEndpointLiveValue(endpoint);
+          endpoint.element.classList.toggle('wired', wired);
+          endpoint.element.classList.toggle('wire-pending', state.pendingEndpoint === endpoint.id);
+          setOn(endpoint.element, live);
+          endpoint.element.title = `${endpoint.label}: ${live ? 1 : 0}${wired ? ' wired' : ''}`;
+        });
+        drawWires();
+      }
+      window.addEventListener('resize', drawWires);
+      window.addEventListener('scroll', drawWires, true);
+      createWireLayer();
+      const logicInputPanel = $('.top-section > div:first-child');
+      const inputCells = $$('.flex.flex-col.items-center.gap-2', logicInputPanel).slice(0, 8);
+      const inputSwitches = $$('.toggle-switch', logicInputPanel).slice(0, 8);
+      const inputLeds = $$('.led-green', logicInputPanel).slice(0, 8);
+      const inputJacks = [];
+      inputSwitches.forEach((element, index) => {
+        let jack = $(`[data-pin="input_${index}"]`, inputCells[index]);
+        if (!jack) {
+          jack = document.createElement('div');
+          jack.className = 'connection-point input-output-jack';
+          element.insertAdjacentElement('afterend', jack);
+        }
+        inputJacks[index] = jack;
+        if (jack.classList.contains('physical-socket')) handledSockets.add(jack);
+        else handledPoints.add(jack);
+        registerEndpoint(jack, {
+          id: `IN${index}`,
+          type: 'source',
+          label: `Logic input ${index} output jack`,
+          shortLabel: `IN${index}`,
+          signal: () => liveInput(index)
+        });
+        makeInteractive(element, `Logic input ${index}`, () => {
+          state.inputs[index] = !state.inputs[index];
+          updateAll();
+        });
+      });
+      const indicatorPanel = $('.top-section > div:nth-child(2)');
+      const indicatorCells = $$('.flex.flex-col.items-center.gap-2', indicatorPanel).slice(0, 8);
+      const indicatorPoints = $$('.connection-point', indicatorPanel).slice(0, 8);
+      const indicatorLeds = $$('.led-red', indicatorPanel).slice(0, 8);
+      indicatorCells.forEach((cell, index) => {
+        const label = document.createElement('div');
+        label.className = 'signal-label';
+        cell.appendChild(label);
+        cell._signalLabel = label;
+        handledPoints.add(indicatorPoints[index]);
+        registerEndpoint(indicatorPoints[index], {
+          id: `IND${index}`,
+          type: 'destination',
+          label: `Logic indicator ${index} input jack`,
+          shortLabel: `LED${index}`
+        });
+      });
+      const sidePanel = $('.middle-section > div:first-child');
+      const sideSwitches = $$('.toggle-switch', sidePanel);
+      const sideLeds = $$('.led-green', sidePanel);
+      const sideJacks = [];
+      sideSwitches.forEach((element, index) => {
+        const jack = document.createElement('div');
+        jack.className = 'connection-point aux-output-jack';
+        sideLeds[index]?.insertAdjacentElement('afterend', jack);
+        sideJacks[index] = jack;
+        handledPoints.add(jack);
+        registerEndpoint(jack, {
+          id: `AUX${index}`,
+          type: 'source',
+          label: `Auxiliary switch ${index + 1} output jack`,
+          shortLabel: `AUX${index + 1}`,
+          signal: () => state.power && state.aux[index]
+        });
+        makeInteractive(element, `Auxiliary switch ${index + 1}`, () => {
+          state.aux[index] = !state.aux[index];
+          updateAll();
+        });
+      });
+      const powerSwitch = $('.rocker-switch');
+      makeInteractive(powerSwitch, 'Power switch', () => {
+        state.power = !state.power;
+        if (!state.power) {
+          state.clock.high = false;
+          clearTimeout(state.clock.pulseTimer);
+        }
+        updateAll();
+      });
+      const clockKnob = $('.dial-knob');
+      const clockLamp = $('.bg-red-600');
+      clockLamp?.classList.add('clock-lamp');
+      makeInteractive(clockKnob, 'Clock frequency selector', () => {
+        setClockStep((state.clock.step + 1) % clockSteps.length);
+      });
+      makeInteractive(clockLamp, 'Manual clock pulse', () => {
+        pulseClock();
+      });
+      const bottomSection = $('.bottom-section');
+      const supplySidebar = $('.bottom-section > .absolute');
+      const supplyPoints = $$('.connection-point', supplySidebar);
+      supplyPoints.slice(0, 2).forEach((point, index) => {
+        handledPoints.add(point);
+        registerEndpoint(point, {
+          id: `VCC${index}`,
+          type: 'source',
+          label: `+5V source jack ${index + 1}`,
+          shortLabel: '+5V',
+          signal: () => state.power
+        });
+      });
+      supplyPoints.slice(2, 4).forEach((point, index) => {
+        handledPoints.add(point);
+        registerEndpoint(point, {
+          id: `GND${index}`,
+          type: 'source',
+          label: `Ground source jack ${index + 1}`,
+          shortLabel: 'GND',
+          signal: () => false
+        });
+      });
+      if (supplyPoints[4]) {
+        handledPoints.add(supplyPoints[4]);
+        registerEndpoint(supplyPoints[4], {
+          id: 'PULSE5V',
+          type: 'source',
+          label: 'Clock pulse +5V jack',
+          shortLabel: '+5V',
+          signal: () => state.power
+        });
+      }
+      const bottomPanels = Array.from(bottomSection?.children || []).filter(child => !child.classList.contains('absolute'));
+      const clockGeneratorPoints = $$('.connection-point', bottomPanels[1]);
+      if (clockGeneratorPoints[0]) {
+        handledPoints.add(clockGeneratorPoints[0]);
+        registerEndpoint(clockGeneratorPoints[0], {
+          id: 'CLOCK_GND',
+          type: 'source',
+          label: 'Clock generator ground jack',
+          shortLabel: 'GND',
+          signal: () => false
+        });
+      }
+      if (clockGeneratorPoints[1]) {
+        handledPoints.add(clockGeneratorPoints[1]);
+        registerEndpoint(clockGeneratorPoints[1], {
+          id: 'CLK',
+          type: 'source',
+          label: 'Clock generator CLK output jack',
+          shortLabel: 'CLK',
+          signal: () => state.power && state.clock.high
+        });
+      }
+      gateDefinitions.forEach(config => {
+        config.module = findModuleByTitle(config.title);
+        if (!config.module) return;
+        config.module.classList.add('gate-module');
+        config.readout = document.createElement('div');
+        config.readout.className = 'sim-readout';
+        config.module.appendChild(config.readout);
+        config.sockets = $$('.physical-socket', config.module);
+        config.inputSockets = config.sockets.slice(0, config.pins);
+        config.outputSocket = config.sockets[config.sockets.length - 1];
+        config.inputIds = config.inputSockets.map((_, inputIndex) => `${config.key}:I${inputIndex}`);
+        config.outputId = `${config.key}:OUT`;
+        config.inputSockets.forEach((socket, inputIndex) => {
+          handledSockets.add(socket);
+          registerEndpoint(socket, {
+            id: config.inputIds[inputIndex],
+            type: 'destination',
+            label: `${config.key} gate input ${inputIndex + 1}`,
+            shortLabel: `${config.key} I${inputIndex + 1}`
+          });
+        });
+        handledSockets.add(config.outputSocket);
+        registerEndpoint(config.outputSocket, {
+          id: config.outputId,
+          type: 'source',
+          label: `${config.key} gate output jack`,
+          shortLabel: config.key,
+          signal: () => state.gateOutputs[config.key]
+        });
+      });
+      const adderPanel = findModuleByTitle('4-BIT BINARY ADDER');
+      const adderReadout = document.createElement('div');
+      adderReadout.className = 'sim-readout';
+      adderPanel?.appendChild(adderReadout);
+      const zifSocket = $('.zif-socket');
+      const zifLever = $('.zif-lever');
+      const zifPins = $$('.bg-gray-800', zifSocket);
+      state.zifPins = Array(zifPins.length).fill(false);
+      makeInteractive(zifLever, 'ZIF locking lever', event => {
+        event.stopPropagation();
+        state.zifLocked = !state.zifLocked;
+        updateAll();
+      });
+      makeInteractive(zifSocket, 'ZIF socket', () => {
+        state.zifLocked = !state.zifLocked;
+        updateAll();
+      });
+      zifPins.forEach((pin, index) => {
+        makeInteractive(pin, `ZIF pin ${index + 1}`, event => {
+          event.stopPropagation();
+          state.zifPins[index] = !state.zifPins[index];
+          updateAll();
+        });
+      });
+      const dSection = $$('.middle-section > div').find(element => normalize(element).startsWith('D FLIP FLOP'));
+      const jkSection = $$('.middle-section > div').find(element => normalize(element).startsWith('JK FLIP FLOP'));
+      const dBoxes = dSection ? $$('.border-2.border-black', dSection).slice(0, 2) : [];
+      const jkBoxes = jkSection ? $$('.border-2.border-black', jkSection).slice(0, 2) : [];
+      dBoxes.forEach((box, index) => prepareFlipFlopBox(box, state.dffs[index], () => clockDff(index)));
+      jkBoxes.forEach((box, index) => prepareFlipFlopBox(box, state.jkffs[index], () => clockJkff(index)));
+      function prepareFlipFlopBox(box, config, handler) {
+        box.classList.add('flip-flop-box');
+        const readout = document.createElement('div');
+        readout.className = 'sim-readout';
+        readout.style.position = 'absolute';
+        readout.style.left = '50%';
+        readout.style.bottom = '-28px';
+        readout.style.transform = 'translateX(-50%)';
+        box.appendChild(readout);
+        config.box = box;
+        config.readout = readout;
+        config.sockets = $$('.physical-socket', box);
+        config.sockets.forEach(socket => handledSockets.add(socket));
+        const pin = name => $(`[data-pin="${config.prefix}_${name}"]`, box);
+        config.pinElements = {
+          prs: pin('prs'),
+          d: pin('d'),
+          clk: pin('clk'),
+          clr: pin('clr'),
+          j: pin('j'),
+          k: pin('k'),
+          q: pin('q'),
+          nq: pin('q_inv')
+        };
+        if (config.kind === 'D') {
+          registerEndpoint(config.pinElements.d, {
+            id: `${config.label}:D`,
+            type: 'destination',
+            label: `${config.label} D input jack`,
+            shortLabel: `${config.label} D`
+          });
+          registerEndpoint(config.pinElements.clk, {
+            id: `${config.label}:CLK`,
+            type: 'destination',
+            label: `${config.label} clock input jack`,
+            shortLabel: `${config.label} CLK`
+          });
+          registerEndpoint(config.pinElements.prs, {
+            id: `${config.label}:PRE`,
+            type: 'destination',
+            label: `${config.label} PRS input jack`,
+            shortLabel: `${config.label} PRS`
+          });
+          registerEndpoint(config.pinElements.q, {
+            id: `${config.label}:Q`,
+            type: 'source',
+            label: `${config.label} Q output jack`,
+            shortLabel: `${config.label} Q`,
+            signal: () => state.power && config.q
+          });
+          registerEndpoint(config.pinElements.nq, {
+            id: `${config.label}:NQ`,
+            type: 'source',
+            label: `${config.label} inverted Q output jack`,
+            shortLabel: `${config.label} Q'`,
+            signal: () => state.power && !config.q
+          });
+          registerEndpoint(config.pinElements.clr, {
+            id: `${config.label}:CLR`,
+            type: 'destination',
+            label: `${config.label} CLR input jack`,
+            shortLabel: `${config.label} CLR`
+          });
+        }
+        if (config.kind === 'JK') {
+          registerEndpoint(config.pinElements.j, {
+            id: `${config.label}:J`,
+            type: 'destination',
+            label: `${config.label} J input jack`,
+            shortLabel: `${config.label} J`
+          });
+          registerEndpoint(config.pinElements.clk, {
+            id: `${config.label}:CLK`,
+            type: 'destination',
+            label: `${config.label} clock input jack`,
+            shortLabel: `${config.label} CLK`
+          });
+          registerEndpoint(config.pinElements.k, {
+            id: `${config.label}:K`,
+            type: 'destination',
+            label: `${config.label} K input jack`,
+            shortLabel: `${config.label} K`
+          });
+          registerEndpoint(config.pinElements.prs, {
+            id: `${config.label}:PRE`,
+            type: 'destination',
+            label: `${config.label} PRS input jack`,
+            shortLabel: `${config.label} PRS`
+          });
+          registerEndpoint(config.pinElements.q, {
+            id: `${config.label}:Q`,
+            type: 'source',
+            label: `${config.label} Q output jack`,
+            shortLabel: `${config.label} Q`,
+            signal: () => state.power && config.q
+          });
+          registerEndpoint(config.pinElements.nq, {
+            id: `${config.label}:NQ`,
+            type: 'source',
+            label: `${config.label} inverted Q output jack`,
+            shortLabel: `${config.label} Q'`,
+            signal: () => state.power && !config.q
+          });
+          registerEndpoint(config.pinElements.clr, {
+            id: `${config.label}:CLR`,
+            type: 'destination',
+            label: `${config.label} CLR input jack`,
+            shortLabel: `${config.label} CLR`
+          });
+        }
+        makeInteractive(box, `${config.label} flip flop`, () => {
+          handler();
+          updateAll();
+        });
+      }
+      const sevenSegment = $('.seven-segment');
+      sevenSegment.innerHTML = `
+    <div class="seven-digit" aria-label="BCD 7 segment output">
+      <span class="segment seg-a" data-seg="a"></span>
+      <span class="segment seg-b" data-seg="b"></span>
+      <span class="segment seg-c" data-seg="c"></span>
+      <span class="segment seg-d" data-seg="d"></span>
+      <span class="segment seg-e" data-seg="e"></span>
+      <span class="segment seg-f" data-seg="f"></span>
+      <span class="segment seg-g" data-seg="g"></span>
+      <span class="decimal-dot"></span>
+    </div>
+  `;
+      const segmentElements = Object.fromEntries($$('.segment', sevenSegment).map(segment => [segment.dataset.seg, segment]));
+      const decimalDot = $('.decimal-dot', sevenSegment);
+      const sevenPanel = sevenSegment.closest('.p-4');
+      const bcdPins = $$('.connection-point', sevenPanel).slice(0, 4);
+      bcdPins.forEach((pin, index) => {
+        handledPoints.add(pin);
+        registerEndpoint(pin, {
+          id: `BCD:${'ABCD'[index]}`,
+          type: 'destination',
+          label: `BCD input ${'ABCD'[index]} jack`,
+          shortLabel: `BCD ${'ABCD'[index]}`
+        });
+      });
+      const breadboard = $('.breadboard');
+      const holes = $$('.bb-hole', breadboard);
+      state.holeStates = Array(holes.length).fill(false);
+      holes.forEach((hole, index) => {
+        hole.dataset.node = String(Math.floor(index / 5));
+        makeInteractive(hole, `Breadboard tie point ${index + 1}`, () => {
+          state.holeStates[index] = !state.holeStates[index];
+          updateContinuity(true);
+        });
+      });
+      const continuityPanel = bottomPanels.find(element => normalize(element).includes('CONTINUITY TESTER') && $('.speaker-grill', element));
+      const continuityPoint = $('.connection-point', continuityPanel);
+      const speaker = $('.speaker-grill', continuityPanel);
+      if (continuityPoint) handledPoints.add(continuityPoint);
+      makeInteractive(continuityPoint, 'Continuity tester probe', () => {
+        state.speakerArmed = !state.speakerArmed;
+        updateAll();
+      });
+      makeInteractive(speaker, 'Continuity tester speaker', () => {
+        state.speakerArmed = !state.speakerArmed;
+        updateAll();
+      });
+      $$('.connection-point').forEach((point, index) => {
+        if (handledPoints.has(point)) return;
+        makeInteractive(point, `Patch socket ${index + 1}`, () => {
+          point.classList.toggle('patched');
+        });
+      });
+      $$('.physical-socket').forEach((socket, index) => {
+        if (handledSockets.has(socket)) return;
+        makeInteractive(socket, `Module socket ${index + 1}`, () => {
+          socket.classList.toggle('patched');
+        });
+      });
+      function readNibble(offset) {
+        return (state.inputs[offset] ? 1 : 0)
+          + (state.inputs[offset + 1] ? 2 : 0)
+          + (state.inputs[offset + 2] ? 4 : 0)
+          + (state.inputs[offset + 3] ? 8 : 0);
+      }
+      function updateAdder() {
+        const a = readNibble(0);
+        const b = readNibble(4);
+        const total = a + b;
+        state.adder = { a, b, sum: total & 15, carry: total > 15 };
+        if (adderReadout) {
+          adderReadout.textContent = `A=${a} B=${b} S=${state.adder.sum} C=${state.adder.carry ? 1 : 0}`;
+        }
+        $$('.ic-chip', adderPanel).forEach(chip => chip.classList.toggle('powered', state.power && total > 0));
+      }
+      function updateGates() {
+        gateDefinitions.forEach(config => {
+          const values = config.inputIds.map(inputId => readWiredInput(inputId));
+          const allInputsWired = config.inputIds.every(inputId => getWireForDestination(inputId));
+          const output = state.power && allInputsWired && config.fn(values);
+          state.gateOutputs[config.key] = output;
+          config.inputSockets?.forEach((socket, index) => {
+            setOn(socket, values[index]);
+            const wire = getWireForDestination(config.inputIds[index]);
+            const source = wire ? endpoints.get(wire.sourceId)?.shortLabel : 'open';
+            socket.title = `${config.key} input ${index + 1} from ${source}: ${values[index] ? 1 : 0}`;
+          });
+          setOn(config.outputSocket, output);
+          if (config.outputSocket) config.outputSocket.title = `${config.key} output: ${output ? 1 : 0}`;
+          config.module?.classList.toggle('active', output);
+          $('.gate-svg', config.module)?.classList.toggle('on', output);
+          $$('.ic-chip', config.module).forEach(chip => chip.classList.toggle('powered', state.power));
+          if (config.readout) {
+            const inputText = values.map((value, index) => {
+              const wire = getWireForDestination(config.inputIds[index]);
+              const source = wire ? endpoints.get(wire.sourceId)?.shortLabel : 'OPEN';
+              return `I${index + 1}:${value ? 1 : 0}(${source})`;
+            }).join(' ');
+            config.readout.textContent = `${inputText} OUT:${allInputsWired ? (output ? 1 : 0) : 'OPEN'}`;
+          }
+        });
+      }
+      function getSignal(label) {
+        if (state.gateOutputs[label] !== undefined) return state.gateOutputs[label];
+        if (label.startsWith('SUM')) return state.power && Boolean(state.adder.sum & (1 << Number(label.slice(3))));
+        if (label === 'CARRY') return state.power && state.adder.carry;
+        if (label === 'D1') return state.power && state.dffs[0].q;
+        if (label === 'D2') return state.power && state.dffs[1].q;
+        if (label === 'JK1') return state.power && state.jkffs[0].q;
+        if (label === 'JK2') return state.power && state.jkffs[1].q;
+        if (label === 'CLK') return state.power && state.clock.high;
+        return false;
+      }
+      function updateIndicators() {
+        indicatorCells.forEach((cell, index) => {
+          const destinationId = `IND${index}`;
+          const wire = getWireForDestination(destinationId);
+          const label = wire ? endpoints.get(wire.sourceId)?.shortLabel || 'WIRE' : 'OPEN';
+          const output = readWiredInput(destinationId);
+          setOn(indicatorLeds[index], output);
+          setOn(indicatorPoints[index], output);
+          if (cell._signalLabel) cell._signalLabel.textContent = label;
+          cell.title = `Indicator ${index}: ${label} = ${output ? 1 : 0}`;
+          cell.setAttribute('aria-pressed', String(output));
+        });
+      }
+      function clockDff(index) {
+        const flipFlop = state.dffs[index];
+        if (!state.power) return;
+        if (isActiveLowAsserted(`${flipFlop.label}:CLR`)) {
+          flipFlop.q = false;
+          return;
+        }
+        if (isActiveLowAsserted(`${flipFlop.label}:PRE`)) {
+          flipFlop.q = true;
+          return;
+        }
+        if (readWiredInput(`${flipFlop.label}:CLK`)) {
+          flipFlop.q = readWiredInput(`${flipFlop.label}:D`);
+        }
+      }
+      function clockJkff(index) {
+        const flipFlop = state.jkffs[index];
+        if (!state.power) return;
+        if (isActiveLowAsserted(`${flipFlop.label}:CLR`)) {
+          flipFlop.q = false;
+          return;
+        }
+        if (isActiveLowAsserted(`${flipFlop.label}:PRE`)) {
+          flipFlop.q = true;
+          return;
+        }
+        if (!readWiredInput(`${flipFlop.label}:CLK`)) return;
+        const j = readWiredInput(`${flipFlop.label}:J`);
+        const k = readWiredInput(`${flipFlop.label}:K`);
+        if (j && k) flipFlop.q = !flipFlop.q;
+        else if (j) flipFlop.q = true;
+        else if (k) flipFlop.q = false;
+      }
+      function clockFlipFlops() {
+        state.dffs.forEach((_, index) => clockDff(index));
+        state.jkffs.forEach((_, index) => clockJkff(index));
+      }
+      function evaluateFlipFlopsFromWires() {
+        state.dffs.forEach(flipFlop => {
+          const clearAsserted = isActiveLowAsserted(`${flipFlop.label}:CLR`);
+          const presetAsserted = isActiveLowAsserted(`${flipFlop.label}:PRE`);
+          const clk = readWiredInput(`${flipFlop.label}:CLK`);
+          if (clearAsserted && presetAsserted) {
+            flipFlop.q = true;
+          } else if (clearAsserted) {
+            flipFlop.q = false;
+          } else if (presetAsserted) {
+            flipFlop.q = true;
+          } else if (clk && !flipFlop.lastClk) {
+            flipFlop.q = readWiredInput(`${flipFlop.label}:D`);
+          }
+          flipFlop.lastClk = clk;
+        });
+        state.jkffs.forEach(flipFlop => {
+          const clearAsserted = isActiveLowAsserted(`${flipFlop.label}:CLR`);
+          const presetAsserted = isActiveLowAsserted(`${flipFlop.label}:PRE`);
+          const clk = readWiredInput(`${flipFlop.label}:CLK`);
+          if (clearAsserted && presetAsserted) {
+            flipFlop.q = true;
+          } else if (clearAsserted) {
+            flipFlop.q = false;
+          } else if (presetAsserted) {
+            flipFlop.q = true;
+          } else if (!clk && flipFlop.lastClk) {
+            const j = readWiredInput(`${flipFlop.label}:J`);
+            const k = readWiredInput(`${flipFlop.label}:K`);
+            if (j && k) flipFlop.q = !flipFlop.q;
+            else if (j) flipFlop.q = true;
+            else if (k) flipFlop.q = false;
+          }
+          flipFlop.lastClk = clk;
+        });
+      }
+      function updateFlipFlops() {
+        state.dffs.forEach(flipFlop => {
+          const d = readWiredInput(`${flipFlop.label}:D`);
+          const clk = readWiredInput(`${flipFlop.label}:CLK`);
+          const presetVoltage = readActiveLowInput(`${flipFlop.label}:PRE`);
+          const clearVoltage = readActiveLowInput(`${flipFlop.label}:CLR`);
+          const liveQ = state.power && flipFlop.q;
+          setOn(flipFlop.pinElements?.d, d);
+          setOn(flipFlop.pinElements?.clk, clk);
+          setOn(flipFlop.pinElements?.prs, presetVoltage);
+          setOn(flipFlop.pinElements?.q, liveQ);
+          setOn(flipFlop.pinElements?.nq, state.power && !flipFlop.q);
+          setOn(flipFlop.pinElements?.clr, clearVoltage);
+          flipFlop.box?.classList.toggle('active', liveQ);
+          if (flipFlop.readout) {
+            flipFlop.readout.textContent = `D:${d ? 1 : 0} CLK:${clk ? 1 : 0} PRS:${presetVoltage ? 1 : 0} CLR:${clearVoltage ? 1 : 0} Q:${liveQ ? 1 : 0}`;
+          }
+        });
+        state.jkffs.forEach(flipFlop => {
+          const j = readWiredInput(`${flipFlop.label}:J`);
+          const clk = readWiredInput(`${flipFlop.label}:CLK`);
+          const k = readWiredInput(`${flipFlop.label}:K`);
+          const presetVoltage = readActiveLowInput(`${flipFlop.label}:PRE`);
+          const clearVoltage = readActiveLowInput(`${flipFlop.label}:CLR`);
+          const q = state.power && flipFlop.q;
+          setOn(flipFlop.pinElements?.j, j);
+          setOn(flipFlop.pinElements?.clk, clk);
+          setOn(flipFlop.pinElements?.k, k);
+          setOn(flipFlop.pinElements?.prs, presetVoltage);
+          setOn(flipFlop.pinElements?.q, q);
+          setOn(flipFlop.pinElements?.nq, state.power && !flipFlop.q);
+          setOn(flipFlop.pinElements?.clr, clearVoltage);
+          flipFlop.box?.classList.toggle('active', q);
+          if (flipFlop.readout) {
+            flipFlop.readout.textContent = `J:${j ? 1 : 0} K:${k ? 1 : 0} CLK:${clk ? 1 : 0} PRS:${presetVoltage ? 1 : 0} CLR:${clearVoltage ? 1 : 0} Q:${q ? 1 : 0}`;
+          }
+        });
+      }
+      function updateBcdDisplay() {
+        const values = ['A', 'B', 'C', 'D'].map(letter => readWiredInput(`BCD:${letter}`));
+        const value = (values[0] ? 1 : 0)
+          + (values[1] ? 2 : 0)
+          + (values[2] ? 4 : 0)
+          + (values[3] ? 8 : 0);
+        const activeSegments = state.power && value <= 9 ? segmentMap[value] : [];
+        Object.entries(segmentElements).forEach(([segment, element]) => {
+          element.classList.toggle('on', activeSegments.includes(segment));
+        });
+        decimalDot?.classList.toggle('on', false);
+        bcdPins.forEach((pin, index) => {
+          setOn(pin, values[index]);
+          const wire = getWireForDestination(`BCD:${'ABCD'[index]}`);
+          const source = wire ? endpoints.get(wire.sourceId)?.shortLabel : 'open';
+          pin.title = `BCD ${'ABCD'[index]} from ${source}: ${values[index] ? 1 : 0}`;
+        });
+        sevenSegment.title = value <= 9 ? `BCD display: ${value}` : `BCD display: invalid code ${value}`;
+      }
+      function updateZif() {
+        zifSocket?.classList.toggle('locked', state.zifLocked);
+        zifLever?.classList.toggle('locked', state.zifLocked);
+        zifPins.forEach((pin, index) => {
+          const live = state.zifPins[index] || (state.zifLocked && state.inputs[index % state.inputs.length]);
+          pin.classList.toggle('on', state.power && live);
+        });
+      }
+      function hasContinuity() {
+        const counts = new Map();
+        state.holeStates.forEach((active, index) => {
+          if (!active) return;
+          const node = holes[index].dataset.node;
+          counts.set(node, (counts.get(node) || 0) + 1);
+        });
+        return Array.from(counts.values()).some(count => count >= 2);
+      }
+      function softBeep() {
+        const now = Date.now();
+        if (!state.power || !state.speakerArmed || now - state.lastBeepAt < 260) return;
+        state.lastBeepAt = now;
+        try {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContext) return;
+          const context = new AudioContext();
+          const oscillator = context.createOscillator();
+          const gain = context.createGain();
+          oscillator.frequency.value = 880;
+          gain.gain.value = 0.04;
+          oscillator.connect(gain);
+          gain.connect(context.destination);
+          oscillator.start();
+          gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.12);
+          oscillator.stop(context.currentTime + 0.12);
+        } catch (error) {
+        }
+      }
+      function updateContinuity(shouldBeep = false) {
+        holes.forEach((hole, index) => hole.classList.toggle('active', state.holeStates[index]));
+        const connected = hasContinuity();
+        setOn(continuityPoint, state.power && state.speakerArmed);
+        speaker?.classList.toggle('on', state.power && state.speakerArmed && connected);
+        if (connected && shouldBeep) softBeep();
+      }
+      function updateInputs() {
+        inputSwitches.forEach((element, index) => {
+          element.classList.toggle('on', state.inputs[index]);
+          element.setAttribute('aria-pressed', String(state.inputs[index]));
+          setOn(inputLeds[index], liveInput(index));
+          inputLeds[index].title = `Input ${index}: ${state.inputs[index] ? 1 : 0}`;
+        });
+        sideSwitches.forEach((element, index) => {
+          element.classList.toggle('on', state.aux[index]);
+          element.setAttribute('aria-pressed', String(state.aux[index]));
+          setOn(sideLeds[index], state.power && state.aux[index]);
+          sideLeds[index].title = `Aux ${index + 1}: ${state.aux[index] ? 1 : 0}`;
+        });
+      }
+      function updateClockVisuals() {
+        const step = clockSteps[state.clock.step];
+        if (clockKnob) {
+          clockKnob.style.transform = `rotate(${step.angle}deg)`;
+          clockKnob.title = `Clock: ${step.label}`;
+          clockKnob.setAttribute('aria-label', `Clock frequency ${step.label}`);
+        }
+        setOn(clockLamp, state.power && state.clock.high);
+      }
+      function setClockStep(stepIndex) {
+        state.clock.step = stepIndex;
+        clearInterval(state.clock.interval);
+        state.clock.interval = null;
+        const step = clockSteps[state.clock.step];
+        if (step.period) {
+          state.clock.interval = setInterval(pulseClock, step.period);
+        }
+        updateAll();
+      }
+      function pulseClock() {
+        if (!state.power) return;
+        clearTimeout(state.clock.pulseTimer);
+        state.clock.high = true;
+        updateAll();
+        state.clock.pulseTimer = setTimeout(() => {
+          state.clock.high = false;
+          updateAll();
+        }, 120);
+      }
+      function updatePower() {
+        trainer?.classList.toggle('power-off', !state.power);
+        powerSwitch?.classList.toggle('on', state.power);
+        powerSwitch?.setAttribute('aria-pressed', String(state.power));
+      }
+      function updateAll() {
+        updatePower();
+        updateInputs();
+        updateAdder();
+        updateGates();
+        evaluateFlipFlopsFromWires();
+        updateGates();
+        updateFlipFlops();
+        updateBcdDisplay();
+        updateZif();
+        updateContinuity(false);
+        updateClockVisuals();
+        updateIndicators();
+        updateWiringVisuals();
+      }
+      function applyDFlipFlopConfig() {
+        [
+          ['IN0', 'D1:D', '#e53935'],
+          ['CLK', 'D1:CLK', '#e53935'],
+          ['D1:PRE', 'D1:CLR', '#212121'],
+          ['VCC0', 'D1:PRE', '#e53935'],
+          ['D1:Q', 'IND0', '#e53935'],
+          ['D1:NQ', 'IND1', '#e53935']
+        ].forEach(([sourceId, destinationId, color]) => connectWire(sourceId, destinationId, color));
+      }
+      function applyJkFlipFlopConfig() {
+        [
+          ['JK1:PRE', 'JK1:CLR', '#212121'],
+          ['VCC1', 'JK1:PRE', '#e53935'],
+          ['IN5', 'JK1:J', '#e53935'],
+          ['IN6', 'JK1:K', '#e53935'],
+          ['CLK', 'JK1:CLK', '#e53935'],
+          ['JK1:Q', 'IND2', '#e53935'],
+          ['JK1:NQ', 'IND3', '#212121']
+        ].forEach(([sourceId, destinationId, color]) => connectWire(sourceId, destinationId, color));
+      }
+      $('#clear-wires-btn')?.addEventListener('click', () => {
+        state.wires = [];
+        updateAll();
+      });
+      $('#show-d-btn')?.addEventListener('click', () => {
+        state.wires = [];
+        applyDFlipFlopConfig();
+        if (state.clock.step === 0) setClockStep(1);
+        updateAll();
+      });
+      $('#show-jk-btn')?.addEventListener('click', () => {
+        state.wires = [];
+        applyJkFlipFlopConfig();
+        if (state.clock.step === 0) setClockStep(1);
+        updateAll();
+      });
+      setClockStep(0);
+      updateAll();
+    })();
+  </script>
+</body>
+</html>
