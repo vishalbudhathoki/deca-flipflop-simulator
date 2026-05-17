@@ -31,6 +31,17 @@
       max-width: 1200px;
       position: relative;
     }
+    @media (max-width: 1250px) {
+      body {
+        align-items: flex-start;
+        padding-top: 2vh;
+        overflow-x: hidden;
+      }
+      .trainer-panel {
+        transform-origin: top center;
+        transform: scale(calc(100vw / 1250));
+      }
+    }
     .top-section {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -444,22 +455,10 @@
       box-shadow: 0 0 10px rgba(255, 189, 46, 0.45), 2px 2px 5px rgba(0, 0, 0, 0.5);
     }
     .sim-readout {
-      min-height: 14px;
-      margin-top: 4px;
-      font-family: 'Roboto Mono', monospace;
-      font-size: 9px;
-      line-height: 1.2;
-      color: var(--panel-ink);
-      text-align: center;
-      white-space: nowrap;
+      display: none;
     }
     .signal-label {
-      min-height: 10px;
-      font-family: 'Roboto Mono', monospace;
-      font-size: 8px;
-      line-height: 1;
-      color: #333;
-      text-align: center;
+      display: none;
     }
     .flip-flop-box.active {
       background: #fff8c7;
@@ -697,22 +696,33 @@
       </div>
     </div>
     <div class="middle-section">
-      <div class="flex flex-col justify-around items-center p-2 border-r-dark w-16">
-        <div class="flex items-center gap-1">
-          <div class="toggle-switch" style="width:16px;height:24px;"></div>
-          <div class="led-green" style="width:10px;height:10px;"></div>
+      <div class="w-32 bg-[#e6e4d8] border-r-dark flex flex-col">
+        <div class="p-2 border-b-dark h-16 flex flex-col justify-center mt-2">
+          <div class="flex items-center justify-between px-2 mb-1">
+            <span class="small-label">+5V</span>
+            <div class="connection-point w-3 h-3 relative">
+              <div class="physical-socket" style="top:50%;left:50%;transform:translate(-50%,-50%);" data-type="output" data-pin="vcc_1"></div>
+            </div>
+            <div class="connection-point w-3 h-3 relative">
+              <div class="physical-socket" style="top:50%;left:50%;transform:translate(-50%,-50%);" data-type="output" data-pin="vcc_2"></div>
+            </div>
+          </div>
+          <div class="flex items-center justify-between px-2">
+            <span class="small-label">GND</span>
+            <div class="connection-point w-3 h-3 relative">
+              <div class="physical-socket" style="top:50%;left:50%;transform:translate(-50%,-50%);" data-type="output" data-pin="gnd_1"></div>
+            </div>
+            <div class="connection-point w-3 h-3 relative">
+              <div class="physical-socket" style="top:50%;left:50%;transform:translate(-50%,-50%);" data-type="output" data-pin="gnd_2"></div>
+            </div>
+          </div>
+          <div class="text-center text-xs font-bold mt-1">POWER SUPPLY</div>
         </div>
-        <div class="flex items-center gap-1">
-          <div class="toggle-switch" style="width:16px;height:24px;"></div>
-          <div class="led-green" style="width:10px;height:10px;"></div>
-        </div>
-        <div class="flex items-center gap-1">
-          <div class="toggle-switch" style="width:16px;height:24px;"></div>
-          <div class="led-green" style="width:10px;height:10px;"></div>
-        </div>
-        <div class="flex items-center gap-1">
-          <div class="toggle-switch" style="width:16px;height:24px;"></div>
-          <div class="led-green" style="width:10px;height:10px;"></div>
+        <div class="p-2 flex flex-col items-center justify-center h-16">
+          <div class="flex items-center justify-center w-full px-2">
+            <div id="clock-lamp" class="w-4 h-4 bg-red-600 rounded-full border border-red-800 shadow-inner"></div>
+          </div>
+          <div class="text-center text-xs font-bold mt-1">CLOCK PULSE</div>
         </div>
       </div>
       <div class="border-r-dark">
@@ -1106,43 +1116,6 @@
       </div>
     </div>
     <div class="bottom-section relative">
-      <div class="absolute -top-32 left-0 w-32 bg-[#e6e4d8] border-r-dark border-b-dark z-10 flex flex-col">
-        <div class="p-2 border-b-dark h-16 flex flex-col justify-center">
-          <div class="flex items-center justify-between px-2 mb-1">
-            <span class="small-label">+5V</span>
-            <div class="connection-point w-3 h-3 relative">
-              <div class="physical-socket" style="top:50%;left:50%;transform:translate(-50%,-50%);" data-type="output"
-                data-pin="vcc_1"></div>
-            </div>
-            <div class="connection-point w-3 h-3 relative">
-              <div class="physical-socket" style="top:50%;left:50%;transform:translate(-50%,-50%);" data-type="output"
-                data-pin="vcc_2"></div>
-            </div>
-          </div>
-          <div class="flex items-center justify-between px-2">
-            <span class="small-label">GND</span>
-            <div class="connection-point w-3 h-3 relative">
-              <div class="physical-socket" style="top:50%;left:50%;transform:translate(-50%,-50%);" data-type="output"
-                data-pin="gnd_1"></div>
-            </div>
-            <div class="connection-point w-3 h-3 relative">
-              <div class="physical-socket" style="top:50%;left:50%;transform:translate(-50%,-50%);" data-type="output"
-                data-pin="gnd_2"></div>
-            </div>
-          </div>
-          <div class="text-center text-xs font-bold mt-1">POWER SUPPLY</div>
-        </div>
-        <div class="p-2 flex flex-col items-center justify-center h-16">
-          <div class="flex items-center justify-around w-full px-2">
-            <div id="clock-lamp" class="w-4 h-4 bg-red-600 rounded-full border border-red-800 shadow-inner"></div>
-            <div class="flex flex-col items-center">
-              <span class="small-label">+5V</span>
-              <div class="connection-point w-3 h-3"></div>
-            </div>
-          </div>
-          <div class="text-center text-xs font-bold mt-1">CLOCK PULSE</div>
-        </div>
-      </div>
       <div class="p-4 border-r-dark flex flex-col items-center justify-center w-32 mt-0">
         <h3 class="section-title mb-4">POWER</h3>
         <span class="small-label mb-2">ON</span>
@@ -1734,7 +1707,7 @@
         pulseClock();
       });
       const bottomSection = $('.bottom-section');
-      const supplySidebar = $('.bottom-section > .absolute');
+      const supplySidebar = $('.middle-section > div:first-child');
       const supplyPoints = $$('.connection-point', supplySidebar);
       supplyPoints.slice(0, 2).forEach((point, index) => {
         handledPoints.add(point);
@@ -1766,7 +1739,7 @@
           signal: () => state.power
         });
       }
-      const bottomPanels = Array.from(bottomSection?.children || []).filter(child => !child.classList.contains('absolute'));
+      const bottomPanels = Array.from(bottomSection?.children || []);
       const clockGeneratorPoints = $$('.connection-point', bottomPanels[1]);
       if (clockGeneratorPoints[0]) {
         handledPoints.add(clockGeneratorPoints[0]);
