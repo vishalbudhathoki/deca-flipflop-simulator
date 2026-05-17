@@ -18,8 +18,10 @@
       --border: #2a2d38;
       --accent-blue: #3b82f6;
       --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
       --accent-blue-glow: rgba(59, 130, 246, 0.35);
       --accent-emerald-glow: rgba(16, 185, 129, 0.35);
+      --accent-amber-glow: rgba(245, 158, 11, 0.35);
       --text-primary: #f1f5f9;
       --text-secondary: #94a3b8;
       --text-muted: #64748b;
@@ -146,6 +148,10 @@
       background: radial-gradient(ellipse at 50% 0%, var(--accent-emerald-glow) 0%, transparent 70%);
     }
 
+    .card--amber::before {
+      background: radial-gradient(ellipse at 50% 0%, var(--accent-amber-glow) 0%, transparent 70%);
+    }
+
     .card:hover {
       transform: translateY(-4px);
       border-color: rgba(255, 255, 255, 0.12);
@@ -161,6 +167,10 @@
 
     .card--green:hover {
       box-shadow: 0 8px 40px rgba(16, 185, 129, 0.12), 0 2px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .card--amber:hover {
+      box-shadow: 0 8px 40px rgba(245, 158, 11, 0.12), 0 2px 12px rgba(0, 0, 0, 0.4);
     }
 
     .card:active {
@@ -187,6 +197,11 @@
       border: 1px solid rgba(16, 185, 129, 0.2);
     }
 
+    .card--amber .card-icon {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
     .card-icon svg {
       width: 26px;
       height: 26px;
@@ -198,6 +213,10 @@
 
     .card--green .card-icon svg {
       color: var(--accent-emerald);
+    }
+
+    .card--amber .card-icon svg {
+      color: var(--accent-amber);
     }
 
     .card-title {
@@ -250,6 +269,12 @@
       border: 1px solid rgba(16, 185, 129, 0.15);
     }
 
+    .card--amber .feature-tag {
+      background: rgba(245, 158, 11, 0.1);
+      color: rgba(253, 230, 138, 0.9);
+      border: 1px solid rgba(245, 158, 11, 0.15);
+    }
+
     .card-arrow {
       position: absolute;
       top: 32px;
@@ -271,6 +296,10 @@
       background: rgba(16, 185, 129, 0.08);
     }
 
+    .card--amber .card-arrow {
+      background: rgba(245, 158, 11, 0.08);
+    }
+
     .card:hover .card-arrow {
       transform: translateX(3px);
     }
@@ -281,6 +310,10 @@
 
     .card--green:hover .card-arrow {
       background: rgba(16, 185, 129, 0.15);
+    }
+
+    .card--amber:hover .card-arrow {
+      background: rgba(245, 158, 11, 0.15);
     }
 
     .card-arrow svg {
@@ -294,6 +327,10 @@
 
     .card--green .card-arrow svg {
       color: var(--accent-emerald);
+    }
+
+    .card--amber .card-arrow svg {
+      color: var(--accent-amber);
     }
 
     /* Footer */
@@ -375,6 +412,25 @@
           <span class="feature-tag">Transformer</span>
           <span class="feature-tag">Filters</span>
           <span class="feature-tag">Meters</span>
+        </div>
+      </a>
+
+      <!-- Zener Diode Apparatus -->
+      <a href="src/simulators/zener.html" class="card card--amber" id="card-zener-diode">
+        <div class="card-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+        </div>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <h2 class="card-title">Zener Diode Apparatus</h2>
+        <span class="card-model">PN Junction &amp; Zener Breakdown</span>
+        <p class="card-desc">Explore forward bias, reverse bias, and Zener breakdown characteristics with an interactive variable DC supply and virtual digital multimeter.</p>
+        <div class="card-features">
+          <span class="feature-tag">Breakdown</span>
+          <span class="feature-tag">Multimeter</span>
+          <span class="feature-tag">DC Supply</span>
+          <span class="feature-tag">Volt-Amp Curve</span>
         </div>
       </a>
     </div>
