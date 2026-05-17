@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rectifier Apparatus Simulator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style data-purpose="custom-fonts">
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+    .font-digital {
+      font-family: 'Share Tech Mono', monospace;
+      letter-spacing: -1px;
+    }
+  </style>
+<style data-purpose="custom-utilities">
+    /* LCD Screen inner shadow */
+    .lcd-screen {
+      box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3), inset -1px -1px 3px rgba(255,255,255,0.5);
+    }
+    /* Jack Base Shadow */
+    .jack-base {
+      box-shadow: 2px 2px 4px rgba(0,0,0,0.4), inset -1px -1px 2px rgba(0,0,0,0.5);
+    }
+    /* Panel Bevel */
+    .panel-bevel {
+      box-shadow: 
+        inset 4px 4px 10px rgba(255,255,255,0.8), 
+        inset -4px -4px 10px rgba(0,0,0,0.1),
+        0 10px 30px rgba(0,0,0,0.3);
+    }
+    html,
+    body {
+      min-height: 100%;
+    }
+    body {
+      overflow: auto;
+    }
+    #simulator-panel {
+      min-width: 1180px;
+      touch-action: none;
+    }
+    .meter-row {
+      flex: 0.82 1 0;
+      min-height: 0;
+    }
+    .circuit-row {
+      flex: 1 1 0;
+      min-height: 0;
+    }
+    .wire-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 35;
+      pointer-events: none;
+      overflow: visible;
+    }
+    .wire-path {
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 7;
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.35));
+      pointer-events: stroke;
+      cursor: pointer;
+    }
+    .wire-path.selected {
+      stroke-width: 9;
+      filter: drop-shadow(0 0 4px rgba(255,255,255,0.85)) drop-shadow(0 2px 2px rgba(0,0,0,0.35));
+    }
+    #wire-preview {
+      fill: none;
+      stroke: #d11;
+      stroke-linecap: round;
+      stroke-width: 6;
+      stroke-dasharray: 9 7;
+      opacity: 0;
+      pointer-events: none;
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.25));
+    }
+    .sim-terminal {
+      cursor: crosshair;
+      outline: none;
+      touch-action: none;
+      z-index: 50 !important;
+    }
+    .sim-terminal::after {
+      content: "";
+      position: absolute;
+      inset: -7px;
+      border: 2px solid transparent;
+      border-radius: 9999px;
+      pointer-events: none;
+      transition: border-color 120ms ease, box-shadow 120ms ease;
+    }
+    .sim-terminal:hover::after,
+    .sim-terminal.terminal-active::after,
+    .sim-terminal:focus-visible::after {
+      border-color: rgba(255,255,255,0.95);
+      box-shadow: 0 0 0 2px rgba(17,17,17,0.5), 0 0 10px rgba(255,255,255,0.8);
+    }
+    .lcd-screen span {
+      min-width: 5ch;
+      text-align: right;
+      transition: opacity 120ms ease;
+    }
+    .meter-off {
+      opacity: 0.12;
+    }
+    .load-control {
+      width: 158px;
+      height: 136px;
+    }
+    .dial-face {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .dial-label {
+      position: absolute;
+      font: 700 8px/1 Arial, sans-serif;
+      color: #111;
+      transform: translate(-50%, -50%);
+      white-space: nowrap;
+      transition: color 120ms ease, transform 120ms ease;
+    }
+    .dial-label.dial-active {
+      color: #c40000;
+      transform: translate(-50%, -50%) scale(1.12);
+    }
+    .dial-tick {
+      position: absolute;
+      width: 8px;
+      height: 7px;
+      background: #111;
+      transform: translate(-50%, -50%) rotate(var(--tick-angle));
+      transform-origin: center;
+      transition: background-color 120ms ease, transform 120ms ease;
+    }
+    .dial-tick.dial-active {
+      background: #c40000;
+    }
+    .load-knob {
+      position: absolute;
+      left: 50%;
+      top: 52%;
+      width: 66px;
+      height: 66px;
+      box-sizing: border-box;
+      margin-left: -33px;
+      margin-top: -33px;
+      border: 3px solid #111;
+      border-radius: 9999px;
+      background: radial-gradient(circle at 35% 28%, #d8d8d8 0 8%, #9c9c9c 38%, #5e5e5e 69%, #242424 100%);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.55), inset 3px 3px 7px rgba(255,255,255,0.35), inset -5px -6px 8px rgba(0,0,0,0.35);
+      cursor: pointer;
+      transform: rotate(0deg);
+      transition: transform 100ms ease-in-out;
+      z-index: 22;
+    }
+    .load-knob::before {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      border-radius: inherit;
+      border: 2px solid #111;
+      background:
+        repeating-conic-gradient(from -3deg, #252525 0deg 5deg, #858585 5deg 10deg),
+        radial-gradient(circle, #9f9f9f 0 52%, transparent 53%);
+      box-shadow: inset 2px 2px 5px rgba(255,255,255,0.25), inset -3px -3px 6px rgba(0,0,0,0.4);
+    }
+    .load-knob::after {
+      content: "";
+      position: absolute;
+      inset: 17px;
+      border-radius: inherit;
+      border: 2px solid #111;
+      background: radial-gradient(circle at 36% 28%, #cfcfcf 0 12%, #838383 54%, #444 100%);
+      box-shadow: inset 2px 2px 4px rgba(255,255,255,0.38), inset -3px -4px 5px rgba(0,0,0,0.45);
+    }
+    .knob-pointer {
+      position: absolute;
+      left: 50%;
+      top: 8px;
+      width: 4px;
+      height: 28px;
+      background: #f7f7f7;
+      border-radius: 9999px;
+      transform: translateX(-50%);
+      box-shadow: 0 0 1px #111;
+      z-index: 2;
+    }
+    .load-caption {
+      position: absolute;
+      left: 50%;
+      bottom: -2px;
+      transform: translateX(-50%);
+      font-size: 11px;
+      line-height: 1;
+      font-weight: 800;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .sim-controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .sim-button {
+      border: 2px solid #222;
+      border-radius: 5px;
+      background: linear-gradient(#fbfbfb, #d8d8d8);
+      box-shadow: inset 1px 1px 1px rgba(255,255,255,0.9), 0 2px 3px rgba(0,0,0,0.2);
+      color: #111;
+      cursor: pointer;
+      font: 800 10px/1 Arial, sans-serif;
+      letter-spacing: 0;
+      min-height: 24px;
+      padding: 4px 9px;
+      text-transform: uppercase;
+    }
+    .sim-button:hover {
+      background: linear-gradient(#fff, #cfcfcf);
+    }
+    .sim-button:active {
+      box-shadow: inset 1px 2px 3px rgba(0,0,0,0.25);
+      transform: translateY(1px);
+    }
+    .sim-button:disabled {
+      cursor: default;
+      opacity: 0.45;
+      transform: none;
+    }
+    .sim-button:focus-visible {
+      outline: 2px solid #111;
+      outline-offset: 2px;
+    }
+    @media (max-width: 1212px) {
+      body {
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-200 min-h-screen flex items-center justify-center p-4 antialiased">
+<!-- BEGIN: Main Panel Container -->
+<div class="w-full max-w-[1280px] aspect-[16/9] bg-[#f2f2f2] rounded-xl relative p-4 panel-bevel border-2 border-white select-none" id="simulator-panel">
+<svg aria-hidden="true" class="wire-layer" id="wire-layer">
+<g id="wire-paths"></g>
+<path id="wire-preview"></path>
+</svg>
+<!-- Outer thick black border frame -->
+<div class="w-full h-full border-[3px] border-[#222] rounded-lg p-3 flex flex-col gap-3 relative">
+<!-- BEGIN: Main Header Title -->
+<header class="w-full text-center pb-2">
+<h1 class="text-2xl md:text-3xl font-bold tracking-widest text-[#111] uppercase font-sans">
+          Half Wave/ Full Wave &amp; Bridge Rectifier Apparatus
+        </h1>
+<div aria-label="Simulator wiring controls" class="sim-controls">
+<button class="sim-button" id="undo-wire" type="button">Undo Wire</button>
+<button class="sim-button" id="clear-wires" type="button">Clear Wires</button>
+<button class="sim-button" id="preset-half-wave" type="button">Half Wave: 1 Diode</button>
+<button class="sim-button" id="preset-full-wave" type="button">Full Wave: 2 Diodes</button>
+</div>
+</header>
+<!-- END: Main Header Title -->
+<!-- BEGIN: Top Row Grids (Power & Meters) -->
+<div class="flex gap-3 meter-row">
+<!-- Power Section -->
+<section class="w-[10%] border-[2px] border-[#222] rounded-md flex flex-col items-center py-4 justify-between bg-[#f2f2f2]" data-purpose="power-section">
+<div class="flex flex-col items-center gap-1">
+<span class="text-xs font-bold text-[#111]">OFF</span>
+<!-- Toggle Switch -->
+<div class="w-8 h-8 rounded-full bg-gray-300 border border-gray-500 shadow-md flex items-center justify-center relative cursor-pointer group toggle-switch" data-state="on" id="power-switch">
+<div class="w-2.5 h-6 bg-gradient-to-b from-gray-200 to-gray-400 rounded-full border border-gray-600 absolute -top-2 shadow-lg transition-transform duration-200 origin-bottom transform group-[[data-state=on]]:rotate-180 group-[[data-state=on]]:translate-y-2"></div>
+</div>
+<span class="text-xs font-bold text-[#111] mt-1">ON</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<!-- Red LED -->
+<div class="w-5 h-5 rounded-full bg-red-600 border-2 border-gray-700 shadow-[0_0_8px_#ff0000] relative" id="power-led">
+<div class="absolute inset-[2px] rounded-full bg-gradient-to-br from-white/60 to-transparent"></div>
+</div>
+<span class="text-[10px] font-bold text-[#111] mt-1">MAINS</span>
+</div>
+<span class="text-xs font-bold text-[#111] uppercase pb-1 border-t-2 border-transparent w-full text-center">Power</span>
+</section>
+<!-- Voltmeter Section -->
+<section class="w-[30%] border-[2px] border-[#222] rounded-md relative flex flex-col items-center justify-between pb-1 bg-[#f2f2f2]" data-purpose="voltmeter-section">
+<!-- LCD Display -->
+<div class="w-[85%] h-24 bg-[#b0b0b0] mt-4 border-[3px] border-[#444] border-b-gray-200 border-r-gray-200 rounded p-1.5">
+<div class="w-full h-full bg-[#dce6dc] lcd-screen flex items-center justify-end px-4">
+<span class="font-digital text-6xl text-[#111]" id="voltmeter-display">12.34</span>
+</div>
+</div>
+<!-- Connecting Lines -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none z-0">
+<line stroke="#111" stroke-width="2" x1="30%" x2="30%" y1="110px" y2="80%"></line>
+<line stroke="#111" stroke-width="2" x1="70%" x2="70%" y1="110px" y2="80%"></line>
+</svg>
+<!-- Terminals -->
+<div class="flex w-full justify-around items-end mb-8 relative z-10">
+<div class="flex flex-col items-center relative -left-2">
+<span class="text-lg font-bold mb-1">+</span>
+<!-- Red Jack -->
+<div class="w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center sim-terminal" data-node="meter-v-plus" title="Voltmeter +">
+<div class="w-4 h-4 rounded-full bg-[#cc0000] border border-[#111] flex items-center justify-center">
+<div class="w-1.5 h-1.5 rounded-full bg-black"></div>
+</div>
+</div>
+</div>
+<span class="text-sm font-bold pb-2">15V DC</span>
+<div class="flex flex-col items-center relative left-2">
+<span class="text-lg font-bold mb-1">-</span>
+<!-- Black Jack -->
+<div class="w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center sim-terminal" data-node="meter-v-minus" title="Voltmeter -">
+<div class="w-4 h-4 rounded-full bg-[#111] border border-black flex items-center justify-center">
+<div class="w-1.5 h-1.5 rounded-full bg-black"></div>
+</div>
+</div>
+</div>
+</div>
+<span class="text-sm font-bold uppercase">Voltmeter</span>
+</section>
+<!-- Ammeter Section -->
+<section class="w-[30%] border-[2px] border-[#222] rounded-md relative flex flex-col items-center justify-between pb-1 bg-[#f2f2f2]" data-purpose="ammeter-section">
+<div class="w-[85%] h-24 bg-[#b0b0b0] mt-4 border-[3px] border-[#444] border-b-gray-200 border-r-gray-200 rounded p-1.5">
+<div class="w-full h-full bg-[#dce6dc] lcd-screen flex items-center justify-end px-4">
+<span class="font-digital text-6xl text-[#111]" id="ammeter-display">0.00</span>
+</div>
+</div>
+<svg class="absolute inset-0 w-full h-full pointer-events-none z-0">
+<line stroke="#111" stroke-width="2" x1="30%" x2="30%" y1="110px" y2="80%"></line>
+<line stroke="#111" stroke-width="2" x1="70%" x2="70%" y1="110px" y2="80%"></line>
+</svg>
+<div class="flex w-full justify-around items-end mb-8 relative z-10">
+<div class="flex flex-col items-center relative -left-2">
+<span class="text-lg font-bold mb-1">+</span>
+<div class="w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center sim-terminal" data-node="meter-a-plus" title="Ammeter +">
+<div class="w-4 h-4 rounded-full bg-[#cc0000] border border-[#111] flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div>
+</div>
+</div>
+<span class="text-sm font-bold pb-2">250mA</span>
+<div class="flex flex-col items-center relative left-2">
+<span class="text-lg font-bold mb-1">-</span>
+<div class="w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center sim-terminal" data-node="meter-a-minus" title="Ammeter -">
+<div class="w-4 h-4 rounded-full bg-[#111] border border-black flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div>
+</div>
+</div>
+</div>
+<span class="text-sm font-bold uppercase">Ammeter</span>
+</section>
+<!-- AC Voltmeter Section -->
+<section class="w-[30%] border-[2px] border-[#222] rounded-md relative flex flex-col items-center justify-between pb-1 bg-[#f2f2f2]" data-purpose="ac-voltmeter-section">
+<div class="w-[85%] h-24 bg-[#b0b0b0] mt-4 border-[3px] border-[#444] border-b-gray-200 border-r-gray-200 rounded p-1.5">
+<div class="w-full h-full bg-[#dce6dc] lcd-screen flex items-center justify-end px-4">
+<span class="font-digital text-6xl text-[#111]" id="ac-voltmeter-display">0.00</span>
+</div>
+</div>
+<svg class="absolute inset-0 w-full h-full pointer-events-none z-0">
+<line stroke="#111" stroke-width="2" x1="30%" x2="30%" y1="110px" y2="80%"></line>
+<line stroke="#111" stroke-width="2" x1="70%" x2="70%" y1="110px" y2="80%"></line>
+</svg>
+<div class="flex w-full justify-around items-end mb-8 relative z-10">
+<div class="flex flex-col items-center relative -left-4">
+<div class="h-6"></div>
+<div class="w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center sim-terminal" data-node="meter-ac-plus" title="AC voltmeter input">
+<div class="w-4 h-4 rounded-full bg-[#cc0000] border border-[#111] flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div>
+</div>
+</div>
+<span class="text-sm font-bold pb-2">10V AC</span>
+<div class="flex flex-col items-center relative left-4">
+<div class="h-6"></div>
+<div class="w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center sim-terminal" data-node="meter-ac-minus" title="AC voltmeter common">
+<div class="w-4 h-4 rounded-full bg-[#111] border border-black flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div>
+</div>
+</div>
+</div>
+<span class="text-sm font-bold uppercase">AC Voltmeter</span>
+</section>
+</div>
+<!-- END: Top Row Grids -->
+<!-- BEGIN: Bottom Row Grids -->
+<div class="flex gap-3 circuit-row">
+<!-- Step Down Transformer -->
+<section class="w-[10%] border-[2px] border-[#222] rounded-md flex flex-col items-center justify-between py-2 bg-[#f2f2f2]" data-purpose="transformer-section">
+<div class="flex flex-col items-center gap-1 mt-2">
+<span class="text-xs font-bold">9V</span>
+<div class="w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center sim-terminal" data-node="xfmr-top" title="Transformer 9V top">
+<div class="w-4 h-4 rounded-full bg-blue-600 border border-[#111] flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div>
+</div>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="text-xs font-bold">0</span>
+<div class="w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center sim-terminal" data-node="xfmr-center" title="Transformer 0V center tap">
+<div class="w-4 h-4 rounded-full bg-[#111] border border-black flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div>
+</div>
+</div>
+<div class="flex flex-col items-center gap-1 mb-2">
+<span class="text-xs font-bold">9V</span>
+<div class="w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center sim-terminal" data-node="xfmr-bottom" title="Transformer 9V bottom">
+<div class="w-4 h-4 rounded-full bg-blue-600 border border-[#111] flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div>
+</div>
+</div>
+<span class="text-[10px] font-bold text-center leading-tight uppercase pb-1">Step Down<br/>Transformer</span>
+</section>
+<!-- Rectification Section -->
+<section class="w-[18%] border-[2px] border-[#222] rounded-md flex flex-col justify-between pb-1 bg-[#f2f2f2]" data-purpose="rectification-section">
+<div class="flex-1 flex flex-col justify-evenly px-3 pt-2">
+<!-- D1 -->
+<div class="flex items-center justify-between relative">
+<span class="text-sm font-bold w-4 text-center">A</span>
+<div class="w-6 h-6 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="d1-a" title="D1 anode"><div class="w-3.5 h-3.5 rounded-full bg-[#cc0000] border border-[#111] flex items-center justify-center"><div class="w-1 h-1 rounded-full bg-black"></div></div></div>
+<div class="flex-1 flex items-center justify-center relative px-1">
+<div class="absolute w-full h-[2px] bg-[#111] top-1/2 -translate-y-1/2 z-0"></div>
+<div class="bg-[#f2f2f2] px-1 relative z-10 flex flex-col items-center">
+<span class="text-[10px] font-bold absolute -top-4">D1</span>
+<svg height="16" viewbox="0 0 24 16" width="24">
+<polygon fill="white" points="4,2 16,8 4,14" stroke="#111" stroke-width="2"></polygon>
+<line stroke="#111" stroke-width="2" x1="16" x2="16" y1="2" y2="14"></line>
+</svg>
+</div>
+</div>
+<div class="w-6 h-6 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="d1-k" title="D1 cathode"><div class="w-3.5 h-3.5 rounded-full bg-[#111] border border-[#111] flex items-center justify-center"><div class="w-1 h-1 rounded-full bg-black"></div></div></div>
+<span class="text-sm font-bold w-4 text-center">K</span>
+</div>
+<!-- D2 -->
+<div class="flex items-center justify-between relative">
+<span class="text-sm font-bold w-4 text-center">A</span>
+<div class="w-6 h-6 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="d2-a" title="D2 anode"><div class="w-3.5 h-3.5 rounded-full bg-[#cc0000] border border-[#111] flex items-center justify-center"><div class="w-1 h-1 rounded-full bg-black"></div></div></div>
+<div class="flex-1 flex items-center justify-center relative px-1">
+<div class="absolute w-full h-[2px] bg-[#111] top-1/2 -translate-y-1/2 z-0"></div>
+<div class="bg-[#f2f2f2] px-1 relative z-10 flex flex-col items-center">
+<span class="text-[10px] font-bold absolute -top-4">D2</span>
+<svg height="16" viewbox="0 0 24 16" width="24">
+<polygon fill="white" points="4,2 16,8 4,14" stroke="#111" stroke-width="2"></polygon>
+<line stroke="#111" stroke-width="2" x1="16" x2="16" y1="2" y2="14"></line>
+</svg>
+</div>
+</div>
+<div class="w-6 h-6 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="d2-k" title="D2 cathode"><div class="w-3.5 h-3.5 rounded-full bg-[#111] border border-[#111] flex items-center justify-center"><div class="w-1 h-1 rounded-full bg-black"></div></div></div>
+<span class="text-sm font-bold w-4 text-center">K</span>
+</div>
+<!-- D3 Reversed -->
+<div class="flex items-center justify-between relative">
+<span class="text-sm font-bold w-4 text-center">K</span>
+<div class="w-6 h-6 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="d3-k" title="D3 cathode"><div class="w-3.5 h-3.5 rounded-full bg-[#111] border border-[#111] flex items-center justify-center"><div class="w-1 h-1 rounded-full bg-black"></div></div></div>
+<div class="flex-1 flex items-center justify-center relative px-1">
+<div class="absolute w-full h-[2px] bg-[#111] top-1/2 -translate-y-1/2 z-0"></div>
+<div class="bg-[#f2f2f2] px-1 relative z-10 flex flex-col items-center">
+<span class="text-[10px] font-bold absolute -top-4">D3</span>
+<svg height="16" viewbox="0 0 24 16" width="24">
+<polygon fill="white" points="20,2 8,8 20,14" stroke="#111" stroke-width="2"></polygon>
+<line stroke="#111" stroke-width="2" x1="8" x2="8" y1="2" y2="14"></line>
+</svg>
+</div>
+</div>
+<div class="w-6 h-6 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="d3-a" title="D3 anode"><div class="w-3.5 h-3.5 rounded-full bg-[#cc0000] border border-[#111] flex items-center justify-center"><div class="w-1 h-1 rounded-full bg-black"></div></div></div>
+<span class="text-sm font-bold w-4 text-center">A</span>
+</div>
+<!-- D4 Reversed -->
+<div class="flex items-center justify-between relative">
+<span class="text-sm font-bold w-4 text-center">K</span>
+<div class="w-6 h-6 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="d4-k" title="D4 cathode"><div class="w-3.5 h-3.5 rounded-full bg-[#111] border border-[#111] flex items-center justify-center"><div class="w-1 h-1 rounded-full bg-black"></div></div></div>
+<div class="flex-1 flex items-center justify-center relative px-1">
+<div class="absolute w-full h-[2px] bg-[#111] top-1/2 -translate-y-1/2 z-0"></div>
+<div class="bg-[#f2f2f2] px-1 relative z-10 flex flex-col items-center">
+<span class="text-[10px] font-bold absolute -top-4">D4</span>
+<svg height="16" viewbox="0 0 24 16" width="24">
+<polygon fill="white" points="20,2 8,8 20,14" stroke="#111" stroke-width="2"></polygon>
+<line stroke="#111" stroke-width="2" x1="8" x2="8" y1="2" y2="14"></line>
+</svg>
+</div>
+</div>
+<div class="w-6 h-6 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="d4-a" title="D4 anode"><div class="w-3.5 h-3.5 rounded-full bg-[#cc0000] border border-[#111] flex items-center justify-center"><div class="w-1 h-1 rounded-full bg-black"></div></div></div>
+<span class="text-sm font-bold w-4 text-center">A</span>
+</div>
+</div>
+<span class="text-[11px] font-bold text-center leading-tight uppercase pt-1">Rectification<br/>Section</span>
+</section>
+<!-- Large Circuit Section (Filter, Load, By-pass) -->
+<section class="flex-1 border-[2px] border-[#222] rounded-md relative bg-[#f2f2f2]" data-purpose="main-circuit-section">
+<!-- SVG Schematic Background -->
+<svg class="absolute inset-0 w-full h-full z-0" preserveAspectRatio="none" viewBox="0 0 1000 300">
+<g fill="none" stroke="#111" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" vector-effect="non-scaling-stroke">
+<!-- Rails -->
+<line x1="50" x2="205" y1="60" y2="60"></line>
+<line x1="300" x2="950" y1="60" y2="60"></line>
+<line x1="50" x2="950" y1="240" y2="240"></line>
+<!-- Branch drops -->
+<line x1="150" x2="150" y1="60" y2="105"></line>
+<line x1="150" x2="150" y1="128" y2="188"></line>
+<line x1="150" x2="150" y1="211" y2="240"></line>
+<line x1="350" x2="350" y1="60" y2="105"></line>
+<line x1="350" x2="350" y1="128" y2="188"></line>
+<line x1="350" x2="350" y1="211" y2="240"></line>
+<line x1="550" x2="550" y1="60" y2="128"></line>
+<line x1="550" x2="550" y1="172" y2="240"></line>
+<line x1="750" x2="750" y1="60" y2="128"></line>
+<line x1="950" x2="950" y1="60" y2="240"></line>
+<!-- Inductor L -->
+<path d="M205 60 H222 C222 47 238 47 238 60 C238 47 254 47 254 60 C254 47 270 47 270 60 C270 47 286 47 286 60 H300"></path>
+<!-- Capacitors C1 and C2 -->
+<line x1="134" x2="166" y1="112" y2="112"></line>
+<line x1="134" x2="166" y1="126" y2="126"></line>
+<line x1="334" x2="366" y1="112" y2="112"></line>
+<line x1="334" x2="366" y1="126" y2="126"></line>
+<!-- Open switch symbols behind S1 and S2 toggles -->
+<circle cx="143" cy="198" fill="#111" r="2.4" stroke="none"></circle>
+<circle cx="157" cy="216" fill="#111" r="2.4" stroke="none"></circle>
+<line x1="143" x2="158" y1="198" y2="182"></line>
+<circle cx="343" cy="198" fill="#111" r="2.4" stroke="none"></circle>
+<circle cx="357" cy="216" fill="#111" r="2.4" stroke="none"></circle>
+<line x1="343" x2="358" y1="198" y2="182"></line>
+<!-- Meter symbols -->
+<circle cx="550" cy="150" fill="#f2f2f2" r="22"></circle>
+<text dominant-baseline="middle" fill="#111" font-family="Arial, sans-serif" font-size="18" font-weight="700" stroke="none" text-anchor="middle" x="550" y="151">V</text>
+<circle cx="650" cy="60" fill="#f2f2f2" r="20"></circle>
+<text dominant-baseline="middle" fill="#111" font-family="Arial, sans-serif" font-size="15" font-weight="700" stroke="none" text-anchor="middle" x="650" y="61">mA</text>
+<!-- By-pass capacitor CB -->
+<line x1="870" x2="870" y1="42" y2="78"></line>
+<line x1="884" x2="884" y1="42" y2="78"></line>
+<line x1="830" x2="870" y1="60" y2="60"></line>
+<line x1="884" x2="950" y1="60" y2="60"></line>
+<!-- Ground below voltmeter common -->
+<line x1="550" x2="550" y1="240" y2="260"></line>
+<line x1="532" x2="568" y1="260" y2="260"></line>
+<line x1="537" x2="563" y1="268" y2="268"></line>
+<line x1="543" x2="557" y1="276" y2="276"></line>
+</g>
+</svg>
+<!-- OVERLAYS (Jacks, Switches, Texts) -->
+<!-- Left Input Labels -->
+<div class="absolute left-1 top-[35%] -translate-y-1/2 text-[10px] font-bold leading-tight text-center w-12">
+            RECTIFIED<br/>INPUT
+          </div>
+<!-- Jacks -->
+<!-- Input + -->
+<div class="absolute left-[5%] top-[20%] -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="rect-in-plus" title="Rectified input +"><div class="w-4 h-4 rounded-full bg-[#cc0000] border border-[#111] flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div></div>
+<!-- Input - -->
+<div class="absolute left-[5%] top-[80%] -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="rect-in-minus" title="Rectified input -"><div class="w-4 h-4 rounded-full bg-[#111] border border-black flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div></div>
+<!-- Mid Red Jacks -->
+<div class="absolute left-[45%] top-[20%] -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="dc-link-left" title="DC link left"><div class="w-4 h-4 rounded-full bg-[#cc0000] border border-[#111] flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div></div>
+<div class="absolute left-[50%] top-[20%] -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="dc-link-right" title="DC link right"><div class="w-4 h-4 rounded-full bg-[#cc0000] border border-[#111] flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div></div>
+<!-- Pre-mA Red Jack -->
+<div class="absolute left-[59%] top-[20%] -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="main-ma-in" title="mA input +"><div class="w-4 h-4 rounded-full bg-[#cc0000] border border-[#111] flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div></div>
+<!-- Post-mA Black Jack -->
+<div class="absolute left-[70%] top-[20%] -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="main-ma-out" title="mA output -"><div class="w-4 h-4 rounded-full bg-[#111] border border-[#111] flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div></div>
+<!-- Bottom Mid Black Jack -->
+<div class="absolute left-[55%] top-[80%] -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="dc-common" title="DC common"><div class="w-4 h-4 rounded-full bg-[#111] border border-black flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div></div>
+<!-- Load Blue Jacks -->
+<div class="absolute left-[75%] top-[20%] -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="load-top" title="Load top"><div class="w-4 h-4 rounded-full bg-blue-600 border border-[#111] flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div></div>
+<div class="absolute left-[75%] top-[42%] -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="load-tap" title="Load tap"><div class="w-4 h-4 rounded-full bg-blue-600 border border-[#111] flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div></div>
+<!-- Load Common Black Jack -->
+<div class="absolute left-[75%] top-[80%] -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="load-bottom" title="Load common"><div class="w-4 h-4 rounded-full bg-[#111] border border-black flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div></div>
+<!-- By-pass Red Jack -->
+<div class="absolute left-[83%] top-[20%] -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="bypass-top" title="By-pass capacitor top"><div class="w-4 h-4 rounded-full bg-[#cc0000] border border-[#111] flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div></div>
+<!-- Output Black Jacks -->
+<div class="absolute left-[95%] top-[20%] -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="ripple-top" title="AC ripple top"><div class="w-4 h-4 rounded-full bg-[#111] border border-black flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div></div>
+<div class="absolute left-[95%] top-[80%] -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#333] jack-base flex items-center justify-center z-10 sim-terminal" data-node="ripple-bottom" title="AC ripple bottom"><div class="w-4 h-4 rounded-full bg-[#111] border border-black flex items-center justify-center"><div class="w-1.5 h-1.5 rounded-full bg-black"></div></div></div>
+<!-- Component Labels -->
+<span class="absolute left-[25%] top-[24%] -translate-x-1/2 text-[10px] font-bold">L<br/>(1mH)</span>
+<span class="absolute left-[18%] top-[38%] text-[10px] font-bold">C1</span>
+<span class="absolute left-[38%] top-[38%] text-[10px] font-bold">C2</span>
+<span class="absolute left-[88%] top-[10%] -translate-x-1/2 text-[10px] font-bold">CB</span>
+<span class="absolute left-[77%] top-[50%] text-[10px] font-bold">RL</span>
+<span class="absolute left-[95%] top-[50%] -translate-x-1/2 -translate-y-1/2 text-[10px] font-bold text-center leading-tight">AC<br/>RIPPLE</span>
+<!-- mA polarity labels -->
+<span class="absolute left-[62%] top-[13%] text-[10px] font-bold">+</span>
+<span class="absolute left-[68%] top-[13%] text-[10px] font-bold">-</span>
+<!-- Switches -->
+<!-- S1 -->
+<div class="absolute left-[15%] top-[60%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+<span class="text-[10px] font-bold mb-1">OFF</span>
+<div class="w-5 h-5 rounded-full bg-gray-400 border border-gray-600 flex items-center justify-center relative cursor-pointer group toggle-switch" data-state="on" id="filter-s1">
+<div class="w-1.5 h-5 bg-gradient-to-b from-gray-200 to-gray-400 rounded-full border border-gray-600 absolute -top-1 shadow-md transition-transform duration-200 origin-bottom transform group-[[data-state=on]]:rotate-180 group-[[data-state=on]]:translate-y-2"></div>
+</div>
+<span class="text-[10px] font-bold mt-1">ON</span>
+<span class="text-[10px] font-bold mt-1 absolute -left-4 top-1/2">S1</span>
+</div>
+<!-- S2 -->
+<div class="absolute left-[35%] top-[60%] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+<span class="text-[10px] font-bold mb-1">OFF</span>
+<div class="w-5 h-5 rounded-full bg-gray-400 border border-gray-600 flex items-center justify-center relative cursor-pointer group toggle-switch" data-state="on" id="filter-s2">
+<div class="w-1.5 h-5 bg-gradient-to-b from-gray-200 to-gray-400 rounded-full border border-gray-600 absolute -top-1 shadow-md transition-transform duration-200 origin-bottom transform group-[[data-state=on]]:rotate-180 group-[[data-state=on]]:translate-y-2"></div>
+</div>
+<span class="text-[10px] font-bold mt-1">ON</span>
+<span class="text-[10px] font-bold mt-1 absolute -left-4 top-1/2">S2</span>
+</div>
+<!-- SET LOAD Rotary Knob -->
+<div class="absolute left-[65%] top-[61%] -translate-x-1/2 -translate-y-1/2 load-control">
+<div class="dial-face">
+<span class="dial-label" data-load-index="0">50&Omega;</span>
+<span class="dial-label" data-load-index="1">100&Omega;</span>
+<span class="dial-label" data-load-index="2">200&Omega;</span>
+<span class="dial-label" data-load-index="3">300&Omega;</span>
+<span class="dial-label" data-load-index="4">400&Omega;</span>
+<span class="dial-label" data-load-index="5">500&Omega;</span>
+<span class="dial-label" data-load-index="6">1k&Omega;</span>
+<span class="dial-label" data-load-index="7">5k&Omega;</span>
+<span class="dial-tick" data-load-index="0"></span>
+<span class="dial-tick" data-load-index="1"></span>
+<span class="dial-tick" data-load-index="2"></span>
+<span class="dial-tick" data-load-index="3"></span>
+<span class="dial-tick" data-load-index="4"></span>
+<span class="dial-tick" data-load-index="5"></span>
+<span class="dial-tick" data-load-index="6"></span>
+<span class="dial-tick" data-load-index="7"></span>
+</div>
+<div class="load-knob" id="load-knob" style="transform: rotate(0deg);">
+<span class="knob-pointer"></span>
+</div>
+<span class="load-caption">Set Load</span>
+</div>
+<!-- Bottom Text Labels for Sections -->
+<div class="absolute bottom-1 w-full flex justify-between px-[15%] text-[10px] font-bold uppercase">
+<span>C1 = C2 = 1000&mu;F<br/>FILTER SECTION</span>
+<span>LOAD SECTION</span>
+<span>CB = 100&mu;F<br/>BY-PASS SECTION</span>
+</div>
+</section>
+</div>
+<!-- END: Bottom Row Grids -->
+</div>
+</div>
+<!-- END: Main Panel Container -->
+<!-- BEGIN: Interactive Logic -->
+<script data-purpose="panel-interaction">
+    document.addEventListener('DOMContentLoaded', () => {
+      const panel = document.getElementById('simulator-panel');
+      const wireLayer = document.getElementById('wire-layer');
+      const wirePaths = document.getElementById('wire-paths');
+      const preview = document.getElementById('wire-preview');
+      const terminals = [...document.querySelectorAll('[data-node]')];
+      const terminalByNode = new Map(terminals.map(terminal => [terminal.dataset.node, terminal]));
+      const display = {
+        dc: document.getElementById('voltmeter-display'),
+        current: document.getElementById('ammeter-display'),
+        ripple: document.getElementById('ac-voltmeter-display')
+      };
+      const led = document.getElementById('power-led');
+      const powerSwitch = document.getElementById('power-switch');
+      const filterS1 = document.getElementById('filter-s1');
+      const filterS2 = document.getElementById('filter-s2');
+      const knob = document.getElementById('load-knob');
+      const dialControl = document.querySelector('.load-control');
+      const dialLabels = [...document.querySelectorAll('.dial-label')];
+      const dialTicks = [...document.querySelectorAll('.dial-tick')];
+      const undoWireButton = document.getElementById('undo-wire');
+      const clearWiresButton = document.getElementById('clear-wires');
+      const presetHalfWaveButton = document.getElementById('preset-half-wave');
+      const presetFullWaveButton = document.getElementById('preset-full-wave');
+      const loadValues = [50, 100, 200, 300, 400, 500, 1000, 5000];
+      const knobAngles = [-132, -96, -58, -22, 22, 58, 96, 132];
+      const wires = [];
+      let loadIndex = 4;
+      let selectedWireId = null;
+      let pendingTerminal = null;
+      let dragWire = null;
+      let suppressTerminalClick = false;
+      let suppressKnobClick = false;
+
+      const aliasGroups = [
+        ['rect-in-plus', 'dc-link-left', 'dc-link-right', 'main-ma-in'],
+        ['main-ma-out', 'load-top', 'load-tap', 'bypass-top', 'ripple-top'],
+        ['rect-in-minus', 'dc-common', 'load-bottom', 'ripple-bottom']
+      ];
+
+      const diodeList = [
+        { name: 'D1', anode: 'd1-a', cathode: 'd1-k' },
+        { name: 'D2', anode: 'd2-a', cathode: 'd2-k' },
+        { name: 'D3', anode: 'd3-a', cathode: 'd3-k' },
+        { name: 'D4', anode: 'd4-a', cathode: 'd4-k' }
+      ];
+
+      const dcMeterLeadPairs = [
+        ['main-ma-in', 'main-ma-out'],
+        ['meter-v-plus', 'load-top'],
+        ['meter-v-minus', 'load-bottom']
+      ];
+
+      const acInputMeterPairs = [
+        ['meter-ac-plus', 'xfmr-top'],
+        ['meter-ac-minus', 'xfmr-center']
+      ];
+
+      const wiringPresets = {
+        half: [
+          ['xfmr-top', 'd1-a'],
+          ['d1-k', 'rect-in-plus'],
+          ['xfmr-center', 'rect-in-minus'],
+          ...dcMeterLeadPairs,
+          ...acInputMeterPairs
+        ],
+        full: [
+          ['xfmr-top', 'd1-a'],
+          ['xfmr-bottom', 'd2-a'],
+          ['d1-k', 'rect-in-plus'],
+          ['d2-k', 'rect-in-plus'],
+          ['xfmr-center', 'rect-in-minus'],
+          ...dcMeterLeadPairs,
+          ...acInputMeterPairs
+        ]
+      };
+
+      terminals.forEach(terminal => {
+        terminal.tabIndex = 0;
+        terminal.setAttribute('role', 'button');
+        terminal.setAttribute('aria-label', terminal.title || terminal.dataset.node);
+      });
+
+      function nextWireId() {
+        return `wire-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      }
+
+      function isPowered() {
+        return powerSwitch.getAttribute('data-state') === 'on';
+      }
+
+      function isOn(element) {
+        return element && element.getAttribute('data-state') === 'on';
+      }
+
+      function panelPoint(clientX, clientY) {
+        const rect = panel.getBoundingClientRect();
+        return {
+          x: clientX - rect.left,
+          y: clientY - rect.top
+        };
+      }
+
+      function terminalPoint(node) {
+        const terminal = terminalByNode.get(node);
+        const panelRect = panel.getBoundingClientRect();
+        const rect = terminal.getBoundingClientRect();
+        return {
+          x: rect.left + rect.width / 2 - panelRect.left,
+          y: rect.top + rect.height / 2 - panelRect.top
+        };
+      }
+
+      function wireColor(from, to) {
+        const names = `${from} ${to}`;
+        if (names.includes('minus') || names.includes('common') || names.includes('bottom') || names.includes('-k') || names.includes('out')) {
+          return '#111';
+        }
+        if (names.includes('xfmr') || names.includes('load')) {
+          return '#1d4ed8';
+        }
+        return '#d11';
+      }
+
+      function pathForPoints(a, b, offset = 0) {
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const distance = Math.max(1, Math.hypot(dx, dy));
+        const normalX = -dy / distance;
+        const normalY = dx / distance;
+        const curve = Math.min(90, distance * 0.22) + offset;
+        const cx = (a.x + b.x) / 2 + normalX * curve;
+        const cy = (a.y + b.y) / 2 + normalY * curve;
+        return `M ${a.x.toFixed(1)} ${a.y.toFixed(1)} Q ${cx.toFixed(1)} ${cy.toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`;
+      }
+
+      function renderWires() {
+        wirePaths.replaceChildren();
+        wires.forEach((wire, index) => {
+          const from = terminalPoint(wire.from);
+          const to = terminalPoint(wire.to);
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', pathForPoints(from, to, (index % 3) * 12));
+          path.setAttribute('stroke', wire.color);
+          path.classList.add('wire-path');
+          if (wire.id === selectedWireId) {
+            path.classList.add('selected');
+          }
+          path.dataset.wireId = wire.id;
+          path.dataset.from = wire.from;
+          path.dataset.to = wire.to;
+          path.addEventListener('pointerdown', event => {
+            event.stopPropagation();
+            selectedWireId = wire.id;
+            renderWires();
+          });
+          path.addEventListener('dblclick', event => {
+            event.stopPropagation();
+            removeWire(wire.id);
+          });
+          path.addEventListener('contextmenu', event => {
+            event.preventDefault();
+            removeWire(wire.id);
+          });
+          wirePaths.appendChild(path);
+        });
+        updateWiringButtons();
+      }
+
+      function updateWiringButtons() {
+        const hasWires = wires.length > 0;
+        undoWireButton.disabled = !hasWires;
+        clearWiresButton.disabled = !hasWires;
+      }
+
+      function resetWiringInteraction() {
+        pendingTerminal = null;
+        dragWire = null;
+        preview.style.opacity = '0';
+        terminals.forEach(terminal => terminal.classList.remove('terminal-active'));
+      }
+
+      function wireFromPair([from, to]) {
+        return {
+          id: nextWireId(),
+          from,
+          to,
+          color: wireColor(from, to)
+        };
+      }
+
+      function replaceWires(pairs) {
+        wires.splice(0, wires.length, ...pairs.map(wireFromPair));
+        selectedWireId = null;
+        resetWiringInteraction();
+        renderWires();
+        updateSimulation();
+      }
+
+      function undoWire() {
+        if (!wires.length) {
+          return;
+        }
+        const selectedIndex = selectedWireId ? wires.findIndex(wire => wire.id === selectedWireId) : -1;
+        wires.splice(selectedIndex >= 0 ? selectedIndex : wires.length - 1, 1);
+        selectedWireId = null;
+        resetWiringInteraction();
+        renderWires();
+        updateSimulation();
+      }
+
+      function clearWires() {
+        if (!wires.length) {
+          return;
+        }
+        wires.length = 0;
+        selectedWireId = null;
+        resetWiringInteraction();
+        renderWires();
+        updateSimulation();
+      }
+
+      function addWire(from, to) {
+        if (!from || !to || from === to) {
+          return;
+        }
+        const duplicate = wires.find(wire => (
+          (wire.from === from && wire.to === to) ||
+          (wire.from === to && wire.to === from)
+        ));
+        if (duplicate) {
+          selectedWireId = duplicate.id;
+          renderWires();
+          return;
+        }
+        wires.push({
+          id: nextWireId(),
+          from,
+          to,
+          color: wireColor(from, to)
+        });
+        selectedWireId = wires[wires.length - 1].id;
+        pendingTerminal = null;
+        terminals.forEach(terminal => terminal.classList.remove('terminal-active'));
+        renderWires();
+        updateSimulation();
+      }
+
+      function removeWire(wireId) {
+        const index = wires.findIndex(wire => wire.id === wireId);
+        if (index >= 0) {
+          wires.splice(index, 1);
+          selectedWireId = null;
+          renderWires();
+          updateSimulation();
+        }
+      }
+
+      function startWire(terminal, event) {
+        const node = terminal.dataset.node;
+        dragWire = {
+          from: node,
+          pointerId: event.pointerId
+        };
+        terminal.classList.add('terminal-active');
+        terminal.setPointerCapture(event.pointerId);
+        const start = terminalPoint(node);
+        const end = panelPoint(event.clientX, event.clientY);
+        preview.setAttribute('d', pathForPoints(start, end));
+        preview.setAttribute('stroke', wireColor(node, node));
+        preview.style.opacity = '1';
+      }
+
+      function selectOrConnectTerminal(node) {
+        const terminal = terminalByNode.get(node);
+        if (pendingTerminal === node) {
+          pendingTerminal = null;
+          terminal?.classList.remove('terminal-active');
+          return;
+        }
+        if (!pendingTerminal) {
+          pendingTerminal = node;
+          terminals.forEach(item => item.classList.remove('terminal-active'));
+          terminal?.classList.add('terminal-active');
+          return;
+        }
+        addWire(pendingTerminal, node);
+      }
+
+      function finishWire(terminal) {
+        if (!dragWire) {
+          selectOrConnectTerminal(terminal.dataset.node);
+          return;
+        }
+        addWire(dragWire.from, terminal.dataset.node);
+      }
+
+      terminals.forEach(terminal => {
+        terminal.addEventListener('pointerdown', event => {
+          event.stopPropagation();
+          startWire(terminal, event);
+        });
+
+        terminal.addEventListener('pointerup', event => {
+          event.stopPropagation();
+          const dropTarget = document.elementFromPoint(event.clientX, event.clientY)?.closest?.('[data-node]');
+          if (dragWire && dropTarget && dropTarget.dataset.node !== dragWire.from) {
+            addWire(dragWire.from, dropTarget.dataset.node);
+            suppressTerminalClick = true;
+            setTimeout(() => {
+              suppressTerminalClick = false;
+            }, 0);
+          }
+          preview.style.opacity = '0';
+          terminals.forEach(item => item.classList.remove('terminal-active'));
+          if (pendingTerminal) {
+            terminalByNode.get(pendingTerminal)?.classList.add('terminal-active');
+          }
+          dragWire = null;
+        });
+
+        terminal.addEventListener('click', event => {
+          event.preventDefault();
+          event.stopPropagation();
+          if (suppressTerminalClick) {
+            return;
+          }
+          selectOrConnectTerminal(terminal.dataset.node);
+        });
+
+        terminal.addEventListener('keydown', event => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            finishWire(terminal);
+          }
+        });
+      });
+
+      panel.addEventListener('pointermove', event => {
+        if (!dragWire) {
+          return;
+        }
+        const start = terminalPoint(dragWire.from);
+        const end = panelPoint(event.clientX, event.clientY);
+        preview.setAttribute('d', pathForPoints(start, end));
+      });
+
+      panel.addEventListener('pointerup', event => {
+        if (!dragWire) {
+          return;
+        }
+        const target = event.target.closest?.('[data-node]');
+        if (target) {
+          addWire(dragWire.from, target.dataset.node);
+        }
+        preview.style.opacity = '0';
+        terminalByNode.get(dragWire.from)?.classList.remove('terminal-active');
+        dragWire = null;
+      });
+
+      panel.addEventListener('pointercancel', () => {
+        preview.style.opacity = '0';
+        terminals.forEach(terminal => terminal.classList.remove('terminal-active'));
+        dragWire = null;
+      });
+
+      document.addEventListener('keydown', event => {
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') {
+          event.preventDefault();
+          undoWire();
+          return;
+        }
+        if (event.key === 'Escape') {
+          pendingTerminal = null;
+          dragWire = null;
+          preview.style.opacity = '0';
+          terminals.forEach(terminal => terminal.classList.remove('terminal-active'));
+        }
+        if ((event.key === 'Delete' || event.key === 'Backspace') && selectedWireId) {
+          event.preventDefault();
+          removeWire(selectedWireId);
+        }
+      });
+
+      undoWireButton.addEventListener('click', undoWire);
+      clearWiresButton.addEventListener('click', clearWires);
+      presetHalfWaveButton.addEventListener('click', () => replaceWires(wiringPresets.half));
+      presetFullWaveButton.addEventListener('click', () => replaceWires(wiringPresets.full));
+
+      function makeUnionFind() {
+        const nodes = terminals.map(terminal => terminal.dataset.node);
+        const parent = new Map(nodes.map(node => [node, node]));
+        const find = node => {
+          if (!parent.has(node)) {
+            parent.set(node, node);
+          }
+          const root = parent.get(node);
+          if (root === node) {
+            return node;
+          }
+          const resolved = find(root);
+          parent.set(node, resolved);
+          return resolved;
+        };
+        const union = (a, b) => {
+          const rootA = find(a);
+          const rootB = find(b);
+          if (rootA !== rootB) {
+            parent.set(rootB, rootA);
+          }
+        };
+        wires.forEach(wire => union(wire.from, wire.to));
+        aliasGroups.forEach(group => group.slice(1).forEach(node => union(group[0], node)));
+        return {
+          find,
+          same: (a, b) => find(a) === find(b),
+          groupHas(node, candidates) {
+            const root = find(node);
+            return candidates.some(candidate => find(candidate) === root);
+          }
+        };
+      }
+
+      function detectRectifierMode(graph) {
+        const outerA = 'xfmr-top';
+        const outerB = 'xfmr-bottom';
+        const center = 'xfmr-center';
+        const positive = 'rect-in-plus';
+        const negative = 'rect-in-minus';
+
+        const transformerPairs = [
+          ['xfmr-top', 'xfmr-center'],
+          ['xfmr-bottom', 'xfmr-center'],
+          ['xfmr-top', 'xfmr-bottom']
+        ];
+        const bridgePairConnected = transformerPairs.some(([leftAc, rightAc]) => {
+          const bridgeA = graph.same(leftAc, 'd1-a') && graph.same(leftAc, 'd3-k');
+          const bridgeB = graph.same(rightAc, 'd2-a') && graph.same(rightAc, 'd4-k');
+          const bridgeReversedA = graph.same(rightAc, 'd1-a') && graph.same(rightAc, 'd3-k');
+          const bridgeReversedB = graph.same(leftAc, 'd2-a') && graph.same(leftAc, 'd4-k');
+          return (bridgeA && bridgeB) || (bridgeReversedA && bridgeReversedB);
+        });
+        const bridgePositive = graph.same(positive, 'd1-k') && graph.same(positive, 'd2-k');
+        const bridgeNegative = graph.same(negative, 'd3-a') && graph.same(negative, 'd4-a');
+        if (bridgePairConnected && bridgePositive && bridgeNegative) {
+          return 'bridge';
+        }
+
+        const fullWave =
+          graph.same(outerA, 'd1-a') &&
+          graph.same(outerB, 'd2-a') &&
+          graph.same(positive, 'd1-k') &&
+          graph.same(positive, 'd2-k') &&
+          graph.same(negative, center);
+        const fullWaveReversed =
+          graph.same(outerB, 'd1-a') &&
+          graph.same(outerA, 'd2-a') &&
+          graph.same(positive, 'd1-k') &&
+          graph.same(positive, 'd2-k') &&
+          graph.same(negative, center);
+        if (fullWave || fullWaveReversed) {
+          return 'full';
+        }
+
+        const transformerReturns = ['xfmr-center', 'xfmr-top', 'xfmr-bottom'];
+        const sourceTerminals = ['xfmr-top', 'xfmr-bottom'];
+        for (const diode of diodeList) {
+          const sourceConnected = sourceTerminals.some(source => graph.same(source, diode.anode));
+          const cathodeConnected = graph.same(positive, diode.cathode);
+          const returnConnected = transformerReturns.some(returnNode => graph.same(negative, returnNode) && !graph.same(returnNode, diode.anode));
+          if (sourceConnected && cathodeConnected && returnConnected) {
+            return 'half';
+          }
+        }
+
+        return 'open';
+      }
+
+      function classifyGroup(graph, node) {
+        const before = ['rect-in-plus', 'dc-link-left', 'dc-link-right', 'main-ma-in'];
+        const after = ['main-ma-out', 'load-top', 'load-tap', 'bypass-top', 'ripple-top'];
+        const negative = ['rect-in-minus', 'dc-common', 'load-bottom', 'ripple-bottom'];
+        if (graph.groupHas(node, after)) {
+          return 'after';
+        }
+        if (graph.groupHas(node, before)) {
+          return 'before';
+        }
+        if (graph.groupHas(node, negative)) {
+          return 'negative';
+        }
+        return 'floating';
+      }
+
+      function seriesState(graph) {
+        const forward = graph.same('main-ma-in', 'meter-a-plus') && graph.same('meter-a-minus', 'main-ma-out');
+        const reverse = graph.same('main-ma-in', 'meter-a-minus') && graph.same('meter-a-plus', 'main-ma-out');
+        const jumper = wires.some(wire => (
+          (wire.from === 'main-ma-in' && wire.to === 'main-ma-out') ||
+          (wire.from === 'main-ma-out' && wire.to === 'main-ma-in')
+        ));
+        return {
+          closed: forward || reverse || jumper,
+          meterDirection: forward ? 1 : reverse ? -1 : 0
+        };
+      }
+
+      function sourceNumbers(mode, loadResistance, seriesClosed) {
+        const inputVac = isPowered() ? 10 : 0;
+        if (!isPowered() || mode === 'open' || !seriesClosed) {
+          return {
+            inputVac,
+            dc: 0,
+            current: 0,
+            ripple: 0
+          };
+        }
+        const s1 = isOn(filterS1);
+        const s2 = isOn(filterS2);
+        const filterStrength = Math.min(1, (s1 ? 0.62 : 0) + (s2 ? 0.28 : 0));
+        const modeBase = {
+          half: { dcFactor: 0.45, dcBoost: 0.08, ripple: 6.0, resistance: 12 },
+          full: { dcFactor: 0.9, dcBoost: 0.035, ripple: 2.0, resistance: 14 },
+          bridge: { dcFactor: 0.85, dcBoost: 0.03, ripple: 1.8, resistance: 18 }
+        }[mode];
+        const idealAverage = inputVac * modeBase.dcFactor;
+        const filterLift = 1 + modeBase.dcBoost * filterStrength;
+        const loadSag = loadResistance / (loadResistance + modeBase.resistance);
+        const dc = Math.min(inputVac, Math.max(0, idealAverage * filterLift * loadSag));
+        const current = Math.min(0.25, dc / loadResistance);
+        const rippleFilter = Math.max(0.08, 1 - filterStrength);
+        const loadRipple = Math.min(1.7, Math.sqrt(400 / loadResistance));
+        const ripple = Math.max(0, modeBase.ripple * rippleFilter * loadRipple);
+        return {
+          inputVac,
+          dc,
+          current,
+          ripple
+        };
+      }
+
+      function nodeVoltage(graph, node, values, seriesClosed) {
+        const rail = classifyGroup(graph, node);
+        if (rail === 'negative') {
+          return 0;
+        }
+        if (rail === 'before') {
+          return values.dc;
+        }
+        if (rail === 'after') {
+          return seriesClosed ? values.dc : 0;
+        }
+        return null;
+      }
+
+      function meterReading(graph, plusNode, minusNode, values, seriesClosed) {
+        const plusVoltage = nodeVoltage(graph, plusNode, values, seriesClosed);
+        const minusVoltage = nodeVoltage(graph, minusNode, values, seriesClosed);
+        if (plusVoltage === null || minusVoltage === null) {
+          return 0;
+        }
+        return plusVoltage - minusVoltage;
+      }
+
+      function acMeterReading(graph, values) {
+        const across = (a, b) => (
+          (graph.same('meter-ac-plus', a) && graph.same('meter-ac-minus', b)) ||
+          (graph.same('meter-ac-minus', a) && graph.same('meter-ac-plus', b))
+        );
+        if (!isPowered()) {
+          return 0;
+        }
+        if (across('xfmr-top', 'xfmr-center') || across('xfmr-bottom', 'xfmr-center')) {
+          return values.inputVac;
+        }
+        if (across('xfmr-top', 'xfmr-bottom')) {
+          return values.inputVac * 2;
+        }
+        if (across('ripple-top', 'ripple-bottom')) {
+          return values.ripple;
+        }
+        return 0;
+      }
+
+      function formatValue(value, digits = 2) {
+        const normalized = Math.abs(value) < 0.005 ? 0 : value;
+        return normalized.toFixed(digits);
+      }
+
+      function setDisplays({ dc, current, ripple }) {
+        display.dc.textContent = formatValue(dc);
+        display.current.textContent = formatValue(current);
+        display.ripple.textContent = formatValue(ripple);
+        const off = !isPowered();
+        Object.values(display).forEach(element => element.classList.toggle('meter-off', off));
+        if (off) {
+          led.classList.remove('bg-red-600', 'shadow-[0_0_8px_#ff0000]');
+          led.classList.add('bg-red-900');
+        } else {
+          led.classList.remove('bg-red-900');
+          led.classList.add('bg-red-600', 'shadow-[0_0_8px_#ff0000]');
+        }
+      }
+
+      function dialPosition(angle, radius) {
+        const centerX = dialControl.offsetWidth / 2;
+        const centerY = dialControl.offsetHeight * 0.52;
+        const radians = angle * Math.PI / 180;
+        return {
+          left: centerX + Math.sin(radians) * radius,
+          top: centerY - Math.cos(radians) * radius
+        };
+      }
+
+      function placeDialMarks() {
+        dialLabels.forEach(label => {
+          const index = Number(label.dataset.loadIndex);
+          const position = dialPosition(knobAngles[index], 56);
+          label.style.left = `${position.left.toFixed(1)}px`;
+          label.style.top = `${position.top.toFixed(1)}px`;
+        });
+        dialTicks.forEach(tick => {
+          const index = Number(tick.dataset.loadIndex);
+          const position = dialPosition(knobAngles[index], 42);
+          tick.style.left = `${position.left.toFixed(1)}px`;
+          tick.style.top = `${position.top.toFixed(1)}px`;
+          tick.style.setProperty('--tick-angle', `${knobAngles[index]}deg`);
+        });
+      }
+
+      function updateSimulation() {
+        const graph = makeUnionFind();
+        const mode = detectRectifierMode(graph);
+        const series = seriesState(graph);
+        const values = sourceNumbers(mode, loadValues[loadIndex], series.closed);
+        const dcReading = meterReading(graph, 'meter-v-plus', 'meter-v-minus', values, series.closed);
+        const currentReading = series.meterDirection ? values.current * series.meterDirection : 0;
+        setDisplays({
+          dc: dcReading,
+          current: currentReading,
+          ripple: acMeterReading(graph, values)
+        });
+      }
+
+      function setLoadIndex(index) {
+        loadIndex = Math.max(0, Math.min(loadValues.length - 1, index));
+        knob.style.transform = `rotate(${knobAngles[loadIndex]}deg)`;
+        knob.setAttribute('aria-valuenow', String(loadValues[loadIndex]));
+        knob.title = `Load ${loadValues[loadIndex] >= 1000 ? `${loadValues[loadIndex] / 1000}k` : loadValues[loadIndex]} ohm`;
+        dialLabels.forEach(label => label.classList.toggle('dial-active', Number(label.dataset.loadIndex) === loadIndex));
+        dialTicks.forEach(tick => tick.classList.toggle('dial-active', Number(tick.dataset.loadIndex) === loadIndex));
+        updateSimulation();
+      }
+
+      function knobIndexFromPointer(event) {
+        const rect = knob.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        let angle = Math.atan2(event.clientY - cy, event.clientX - cx) * 180 / Math.PI + 90;
+        if (angle > 180) {
+          angle -= 360;
+        }
+        const minAngle = knobAngles[0];
+        const maxAngle = knobAngles[knobAngles.length - 1];
+        const normalized = Math.max(minAngle, Math.min(maxAngle, angle));
+        let nearest = 0;
+        let nearestDistance = Infinity;
+        knobAngles.forEach((candidate, index) => {
+          const distance = Math.abs(candidate - normalized);
+          if (distance < nearestDistance) {
+            nearest = index;
+            nearestDistance = distance;
+          }
+        });
+        return nearest;
+      }
+
+      document.querySelectorAll('.toggle-switch').forEach(toggle => {
+        toggle.tabIndex = 0;
+        toggle.setAttribute('role', 'switch');
+        toggle.setAttribute('aria-checked', String(isOn(toggle)));
+        toggle.addEventListener('click', () => {
+          const currentState = toggle.getAttribute('data-state');
+          const nextState = currentState === 'on' ? 'off' : 'on';
+          toggle.setAttribute('data-state', nextState);
+          toggle.setAttribute('aria-checked', String(nextState === 'on'));
+          updateSimulation();
+        });
+        toggle.addEventListener('keydown', event => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            toggle.click();
+          }
+        });
+      });
+
+      knob.tabIndex = 0;
+      knob.setAttribute('role', 'slider');
+      knob.setAttribute('aria-valuemin', String(loadValues[0]));
+      knob.setAttribute('aria-valuemax', String(loadValues[loadValues.length - 1]));
+      knob.addEventListener('click', () => {
+        if (suppressKnobClick) {
+          suppressKnobClick = false;
+          return;
+        }
+        setLoadIndex((loadIndex + 1) % loadValues.length);
+      });
+      knob.addEventListener('wheel', event => {
+        event.preventDefault();
+        setLoadIndex(loadIndex + (event.deltaY > 0 ? 1 : -1));
+      });
+      knob.addEventListener('keydown', event => {
+        if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
+          event.preventDefault();
+          setLoadIndex(loadIndex + 1);
+        }
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
+          event.preventDefault();
+          setLoadIndex(loadIndex - 1);
+        }
+      });
+      knob.addEventListener('pointerdown', event => {
+        knob.setPointerCapture(event.pointerId);
+        const startIndex = loadIndex;
+        const move = moveEvent => {
+          const nextIndex = knobIndexFromPointer(moveEvent);
+          suppressKnobClick = suppressKnobClick || nextIndex !== startIndex;
+          setLoadIndex(nextIndex);
+        };
+        const up = () => {
+          knob.removeEventListener('pointermove', move);
+          knob.removeEventListener('pointerup', up);
+        };
+        knob.addEventListener('pointermove', move);
+        knob.addEventListener('pointerup', up);
+      });
+
+      window.addEventListener('resize', () => {
+        renderWires();
+        placeDialMarks();
+      });
+      placeDialMarks();
+      setLoadIndex(loadIndex);
+      renderWires();
+      updateSimulation();
+    });
+  </script>
+<!-- END: Interactive Logic -->
+</body></html>
