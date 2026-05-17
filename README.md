@@ -19,5 +19,3 @@ If you want to test the flip-flops:
 2. Turn the clock selector to 10 or 100 to start the pulse.
 3. Mess with the input switches and watch the indicators. The JK flip-flop changes on the falling edge (when the red light turns off) and the D flip-flop changes on the rising edge.
 
-### Future stuff
-Might add more complex ICs or a better way to save wiring states later.
