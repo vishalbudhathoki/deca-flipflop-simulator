@@ -611,6 +611,13 @@
       z-index: 12;
     }
 
+    .common-terminal:hover,
+    .common-terminal.active,
+    .common-terminal.selected,
+    .common-terminal.drop-target {
+      transform: translate(-50%, -1px);
+    }
+
     .zener-package {
       position: relative;
       z-index: 2;
@@ -1319,21 +1326,23 @@
                   <text x="64" y="35" font-size="12" font-weight="800" text-anchor="middle">Rs 1k&Omega;</text>
                 </svg>
                 <div class="terminal-stack">
-                  <span>-</span>
+                  <span>+</span>
                   <span>Rs(out)</span>
-                  <span class="terminal red" data-terminal="rs_out" title="Series resistor output"></span>
+                  <span class="terminal red" data-terminal="rs_out" title="Positive output after series resistor"></span>
                 </div>
                 <div class="output-label">OUTPUT<br>0-15VDC</div>
                 <div class="terminal-stack">
-                  <span>Rs(+)</span>
-                  <span class="terminal black" data-terminal="ps_neg" title="Power supply return"></span>
+                  <span>-</span>
+                  <span>COMMON</span>
+                  <span class="terminal black" data-terminal="ps_neg" title="Negative common return"></span>
                 </div>
                 <div class="terminal-stack">
                   <span></span>
                 </div>
                 <div class="terminal-stack">
-                  <span>Rs(out)</span>
-                  <span class="terminal black" data-terminal="ps_neg_aux" title="Power supply return duplicate"></span>
+                  <span>-</span>
+                  <span>COMMON</span>
+                  <span class="terminal black" data-terminal="ps_neg_aux" title="Negative common return duplicate"></span>
                 </div>
               </div>
               <h2 style="position:absolute;bottom:10px;left:0;width:100%;">IC REGULATED POWER SUPPLY 0-15V DC</h2>
